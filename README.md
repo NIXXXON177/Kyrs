@@ -9,6 +9,10 @@
 # Закрытая система для информации о квалификации сотрудников компании "ТехноЛайн"
 
 <p align="center">
+  <img src="img/MainLogo.svg" alt="ТехноЛайн Logo" width="150">
+</p>
+
+<p align="center">
   <a href="https://nixxxon177.github.io/Kyrs/"><img src="https://img.shields.io/badge/Live%20Demo-5EA94A?style=for-the-badge&logo=github&logoColor=white" alt="Live Demo"></a>
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
