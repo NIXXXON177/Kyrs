@@ -47,5 +47,18 @@ function initCommon() {
 	}
 }
 
+// Preloader
+window.addEventListener('load', function () {
+	const preloader = document.getElementById('preloader')
+	if (preloader) {
+		setTimeout(() => {
+			preloader.classList.add('hidden')
+			setTimeout(() => {
+				preloader.style.display = 'none'
+			}, 500) // Match transition duration
+		}, 2000) // Minimum show time
+	}
+})
+
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', initCommon)
