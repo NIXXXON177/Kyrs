@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>План обучения | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link active">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">План обучения</h1>
+
+					<!-- График курсов -->
+					<section class="card">
+						<div class="card-header">
+							<h2 class="card-title">График предстоящих курсов</h2>
+						</div>
+						<div id="coursesTimeline" class="timeline">
+							<!-- Динамически загрузится через JS -->
+						</div>
+					</section>
+
+					<!-- Рекомендации -->
+					<section class="card">
+						<div class="card-header">
+							<h2 class="card-title">Рекомендации по развитию</h2>
+						</div>
+						<div id="recommendationsList" class="recommendations">
+							<!-- Рекомендации загрузятся через JS -->
+						</div>
+					</section>
+
+					<!-- Приоритеты обучения -->
+					<section class="card">
+						<div class="card-header">
+							<h2 class="card-title">Приоритеты обучения</h2>
+						</div>
+						<div class="priority-grid">
+							<div class="priority-item high">
+								<div class="priority-icon">🔥</div>
+								<div class="priority-content">
+									<h3>Высокий приоритет</h3>
+									<p>Курсы, обязательные к прохождению в течение месяца</p>
+								</div>
+							</div>
+							<div class="priority-item medium">
+								<div class="priority-icon">⏳</div>
+								<div class="priority-content">
+									<h3>Средний приоритет</h3>
+									<p>Плановое обучение в течение квартала</p>
+								</div>
+							</div>
+							<div class="priority-item low">
+								<div class="priority-icon">💡</div>
+								<div class="priority-content">
+									<h3>Низкий приоритет</h3>
+									<p>Рекомендованные курсы для профессионального развития</p>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Статистика обучения -->
+					<section class="card">
+						<div class="card-header">
+							<h2 class="card-title">Статистика обучения</h2>
+						</div>
+						<div class="stats-grid">
+							<div class="stat-item">
+								<div class="stat-value" id="plannedCourses">0</div>
+								<div class="stat-label">Запланировано курсов</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-value" id="completionRate">0%</div>
+								<div class="stat-label">Выполнение плана</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-value" id="avgPriority">-</div>
+								<div class="stat-label">Средний приоритет</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/modal.js"></script>
+		<script src="../scripts/plan.js"></script>
+		<script src="../scripts/plan-init.js"></script>
+	</body>
+</html>

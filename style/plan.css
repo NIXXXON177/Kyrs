@@ -1,0 +1,244 @@
+/* Стили для страницы плана обучения */
+
+/* Таймлайн курсов */
+.timeline {
+	margin-top: 1rem;
+}
+
+.timeline-month {
+	margin-bottom: 2.5rem;
+}
+
+.month-title {
+	color: var(--text-light);
+	font-size: 1.3rem;
+	font-weight: 600;
+	margin-bottom: 1.5rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid var(--primary);
+}
+
+.month-courses {
+	display: grid;
+	gap: 1rem;
+}
+
+.course-plan-card {
+	display: flex;
+	justify-content: between;
+	align-items: center;
+	gap: 1.5rem;
+	padding: 1.5rem;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius);
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+.course-plan-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--glass-shadow);
+	border-color: var(--primary);
+}
+
+.course-plan-main {
+	flex: 1;
+}
+
+.course-plan-header {
+	display: flex;
+	justify-content: between;
+	align-items: flex-start;
+	gap: 1rem;
+	margin-bottom: 0.75rem;
+}
+
+.course-plan-title {
+	color: var(--text-light);
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin: 0;
+	flex: 1;
+}
+
+.course-badges {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+.course-badge {
+	padding: 0.25rem 0.75rem;
+	border-radius: 20px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.course-badge.type-обязательный {
+	background: rgba(244, 67, 54, 0.2);
+	color: #f44336;
+	border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.course-badge.type-рекомендованный {
+	background: rgba(33, 150, 243, 0.2);
+	color: #2196f3;
+	border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.course-badge.priority-высокий {
+	background: rgba(244, 67, 54, 0.2);
+	color: #f44336;
+	border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.course-badge.priority-средний {
+	background: rgba(255, 152, 0, 0.2);
+	color: #ff9800;
+	border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.course-badge.priority-низкий {
+	background: rgba(76, 175, 80, 0.2);
+	color: #4caf50;
+	border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.course-plan-description {
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+	line-height: 1.5;
+}
+
+.course-plan-meta {
+	display: flex;
+	gap: 1.5rem;
+	flex-wrap: wrap;
+}
+
+.meta-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+/* Приоритеты обучения */
+.priority-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 1.5rem;
+	margin-top: 1rem;
+}
+
+.priority-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1.5rem;
+	border-radius: var(--radius);
+	border-left: 4px solid;
+	transition: all 0.3s ease;
+}
+
+.priority-item:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--glass-shadow);
+}
+
+.priority-item.high {
+	border-left-color: #f44336;
+	background: rgba(244, 67, 54, 0.1);
+}
+
+.priority-item.medium {
+	border-left-color: #ff9800;
+	background: rgba(255, 152, 0, 0.1);
+}
+
+.priority-item.low {
+	border-left-color: #4caf50;
+	background: rgba(76, 175, 80, 0.1);
+}
+
+.priority-icon {
+	font-size: 1.5rem;
+	flex-shrink: 0;
+}
+
+.priority-content h3 {
+	color: var(--text-light);
+	margin-bottom: 0.5rem;
+	font-size: 1.1rem;
+}
+
+.priority-content p {
+	color: var(--text-muted);
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* Рекомендации */
+.recommendations {
+	margin-top: 1rem;
+}
+
+.recommendation-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1.25rem;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: var(--radius);
+	margin-bottom: 1rem;
+	border-left: 4px solid var(--primary);
+}
+
+.recommendation-item:last-child {
+	margin-bottom: 0;
+}
+
+.recommendation-icon {
+	font-size: 1.25rem;
+	flex-shrink: 0;
+	margin-top: 0.125rem;
+}
+
+.recommendation-text {
+	color: var(--text-light);
+	line-height: 1.5;
+	flex: 1;
+}
+
+/* Статистика */
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 1.5rem;
+	margin-top: 1rem;
+}
+
+.stat-item {
+	text-align: center;
+	padding: 1.5rem;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: var(--radius);
+	border: 1px solid var(--glass-border);
+}
+
+.stat-value {
+	font-size: 2rem;
+	font-weight: 700;
+	color: var(--primary-light);
+	margin-bottom: 0.5rem;
+}
+
+.stat-label {
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+

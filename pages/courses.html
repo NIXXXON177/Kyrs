@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Мои курсы | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link active">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">Мои курсы</h1>
+
+					<!-- Фильтры -->
+					<div class="filters">
+						<div class="filter-group">
+							<label for="statusFilter" class="filter-label"
+								>Статус курса</label
+							>
+							<select id="statusFilter" class="filter-select">
+								<option value="all">Все статусы</option>
+								<option value="пройден">Пройден</option>
+								<option value="в процессе">В процессе</option>
+								<option value="назначен">Назначен</option>
+								<option value="просрочен">Просрочен</option>
+							</select>
+						</div>
+
+						<div class="filter-group">
+							<label for="searchInput" class="filter-label"
+								>Поиск по названию</label
+							>
+							<input
+								type="text"
+								id="searchInput"
+								class="search-input"
+								placeholder="Введите название курса..."
+							/>
+						</div>
+					</div>
+
+					<div class="courses-header">
+						<div
+							id="resultsCount"
+							class="mb-3"
+							style="font-weight: 500; color: var(--text-dark)"
+						>
+							<!-- Счетчик результатов будет обновляться через filters.js -->
+						</div>
+						<div class="print-buttons">
+							<button
+								id="testPrintBtn"
+								class="btn btn-outline"
+								style="margin-right: 10px"
+							>
+								🧪 Тест печати
+							</button>
+							<button id="printCoursesBtn" class="btn btn-secondary">
+								🖨️ Печать списка курсов
+							</button>
+							<button id="printCertificatesBtn" class="btn btn-primary">
+								🏆 Печать сертификатов
+							</button>
+						</div>
+					</div>
+
+					<!-- Список курсов -->
+					<div class="courses-grid" id="coursesContainer">
+						<!-- Курсы будут загружены через filters.js -->
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/modal.js"></script>
+		<script src="../scripts/filters.js"></script>
+		<script src="../scripts/courses-init.js"></script>
+	</body>
+</html>

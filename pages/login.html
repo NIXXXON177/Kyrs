@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Вход в систему | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div class="form-container">
+			<div class="logo-section" style="text-align: center; margin-bottom: 2rem">
+				<img
+					src="../img/MainLogo.svg"
+					alt="Logo"
+					style="height: 64px; margin-bottom: 1rem"
+				/>
+				<h1 class="form-title">Вход в систему</h1>
+			</div>
+
+			<form id="loginForm">
+				<div
+					id="loginError"
+					class="notification error hidden"
+					style="margin-bottom: 1rem"
+				></div>
+
+				<div class="form-group">
+					<label for="login" class="form-label">Логин</label>
+					<input
+						type="text"
+						id="login"
+						class="form-input"
+						placeholder="Введите ваш логин"
+						required
+					/>
+				</div>
+
+				<div class="form-group">
+					<label for="password" class="form-label">Пароль</label>
+					<input
+						type="password"
+						id="password"
+						class="form-input"
+						placeholder="Введите ваш пароль"
+						required
+					/>
+				</div>
+
+				<button type="submit" class="btn btn-block">Войти</button>
+			</form>
+
+			<div
+				style="
+					margin-top: 2rem;
+					text-align: center;
+					font-size: 0.9rem;
+					color: #666;
+				"
+			>
+				<p>Демо доступ:</p>
+				<p>
+					<strong>Логин:</strong> petrov <strong>Пароль:</strong> password123
+				</p>
+				<p>
+					<strong>Логин:</strong> ivanov <strong>Пароль:</strong> password123
+				</p>
+			</div>
+		</div>
+
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+	</body>
+</html>

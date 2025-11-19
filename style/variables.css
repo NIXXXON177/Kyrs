@@ -1,0 +1,21 @@
+/* CSS переменные и тема */
+:root {
+	--primary: #0059ff;
+	--primary-dark: #041a53;
+	--primary-light: #4d88ff;
+	--background: #0a0f25;
+	--background-light: #1a1f35;
+	--background-dark: #050815;
+	--text-light: #ffffff;
+	--text-muted: #a0a8c5;
+	--text-dark: #e0e8ff;
+	--gradient: linear-gradient(135deg, #0059ff 0%, #041a53 100%);
+	--gradient-dark: linear-gradient(135deg, #0044cc 0%, #030a2b 100%);
+	--shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	--radius: 12px;
+	--glass-bg: rgba(255, 255, 255, 0.05);
+	--glass-border: rgba(255, 255, 255, 0.1);
+	--glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+	--accent-glow: 0 0 20px rgba(0, 89, 255, 0.3);
+}
+

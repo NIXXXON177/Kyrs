@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Ошибка | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<!-- Навигация -->
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<!-- Основной контент -->
+			<main class="main-content">
+				<div class="container">
+					<div class="error-container">
+						<div class="error-content">
+							<div class="error-code" id="errorCode">404</div>
+							<h1 class="error-title">Страница не найдена</h1>
+							<p class="error-message" id="errorMessage">
+								К сожалению, запрашиваемая страница не существует или была
+								перемещена.
+							</p>
+							<div class="error-actions">
+								<a href="../index.html" class="btn">Вернуться на главную</a>
+								<a href="courses.html" class="btn btn-secondary">Мои курсы</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/modal.js"></script>
+		<script src="../scripts/error-init.js"></script>
+
+		<style>
+			.error-container {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: calc(100vh - 200px);
+				padding: 2rem;
+			}
+
+			.error-content {
+				text-align: center;
+				max-width: 600px;
+				width: 100%;
+			}
+
+			.error-code {
+				font-size: 8rem;
+				font-weight: 700;
+				background: var(--gradient);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				line-height: 1;
+				margin-bottom: 1rem;
+				text-shadow: 0 0 40px rgba(0, 89, 255, 0.5);
+				animation: pulse 2s ease-in-out infinite;
+			}
+
+			@keyframes pulse {
+				0%,
+				100% {
+					opacity: 1;
+					transform: scale(1);
+				}
+				50% {
+					opacity: 0.8;
+					transform: scale(1.05);
+				}
+			}
+
+			.error-title {
+				font-size: 2rem;
+				font-weight: 600;
+				color: var(--text-light);
+				margin-bottom: 1rem;
+			}
+
+			.error-message {
+				font-size: 1.1rem;
+				color: var(--text-muted);
+				margin-bottom: 2.5rem;
+				line-height: 1.6;
+			}
+
+			.error-actions {
+				display: flex;
+				gap: 1rem;
+				justify-content: center;
+				flex-wrap: wrap;
+			}
+
+			.error-actions .btn {
+				min-width: 180px;
+			}
+
+			@media (max-width: 768px) {
+				.error-code {
+					font-size: 5rem;
+				}
+
+				.error-title {
+					font-size: 1.5rem;
+				}
+
+				.error-message {
+					font-size: 1rem;
+				}
+
+				.error-actions {
+					flex-direction: column;
+				}
+
+				.error-actions .btn {
+					width: 100%;
+				}
+			}
+		</style>
+	</body>
+</html>
