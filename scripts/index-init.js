@@ -5,3 +5,15 @@ document.addEventListener('DOMContentLoaded', function () {
 	// Здесь только дополнительные обработчики, если нужны
 })
 
+// Preloader
+window.addEventListener('load', function () {
+	const preloader = document.getElementById('preloader')
+	if (preloader) {
+		setTimeout(() => {
+			preloader.classList.add('hidden')
+			setTimeout(() => {
+				preloader.style.display = 'none'
+			}, 500) // Match transition duration
+		}, 1000) // Minimum show time
+	}
+})
