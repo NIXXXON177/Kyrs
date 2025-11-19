@@ -47,21 +47,5 @@ function initCommon() {
 	}
 }
 
-// Preloader
-window.addEventListener('load', function () {
-	const preloader = document.getElementById('preloader')
-	if (preloader) {
-		console.log('Preloader found, hiding in 3 seconds')
-		setTimeout(() => {
-			preloader.classList.add('hidden')
-			setTimeout(() => {
-				preloader.style.display = 'none'
-			}, 500) // Match transition duration
-		}, 3000) // Minimum show time
-	} else {
-		console.log('Preloader not found')
-	}
-})
-
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', initCommon)
