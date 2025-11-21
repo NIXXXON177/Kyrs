@@ -155,7 +155,7 @@ function createProgressElement(progress) {
 	progressLabel.className = 'progress-label'
 
 	const span = document.createElement('span')
-	span.textContent = `${progress}% завершено`
+	span.textContent = `${progress}%`
 	progressLabel.appendChild(span)
 
 	progressBar.appendChild(progressFill)

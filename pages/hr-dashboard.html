@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Управление персоналом | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<!-- Навигация-->
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<!-- Основной контент -->
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">Управление персоналом</h1>
+
+					<!-- Статистика -->
+					<section class="card stats-card">
+						<div class="card-header">
+							<h2 class="card-title">Общая статистика</h2>
+						</div>
+						<div class="stats-grid">
+							<div class="stat-item">
+								<div class="stat-number" id="totalEmployees">0</div>
+								<div class="stat-label">Всего сотрудников</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-number" id="activeCourses">0</div>
+								<div class="stat-label">Активных курсов</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-number" id="completedCourses">0</div>
+								<div class="stat-label">Завершенных курсов</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-number" id="overdueCourses">0</div>
+								<div class="stat-label">Просроченных курсов</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Список сотрудников -->
+					<section class="card employees-card">
+						<div class="card-header">
+							<h2 class="card-title">Сотрудники</h2>
+						</div>
+
+						<!-- Фильтры -->
+						<div class="filters">
+							<div class="filter-group">
+								<label class="filter-label" for="searchInput">Поиск</label>
+								<input
+									type="text"
+									id="searchInput"
+									class="search-input"
+									placeholder="Поиск по имени, должности или email..."
+								/>
+							</div>
+							<div class="filter-group">
+								<label class="filter-label" for="departmentFilter">Отдел</label>
+								<select id="departmentFilter" class="filter-select">
+									<option value="all">Все отделы</option>
+									<option value="IT-отдел">IT-отдел</option>
+									<option value="Отдел кадров">Отдел кадров</option>
+								</select>
+							</div>
+							<div class="filter-group">
+								<label class="filter-label" for="statusFilter"
+									>Статус курсов</label
+								>
+								<select id="statusFilter" class="filter-select">
+									<option value="all">Все статусы</option>
+									<option value="completed">Пройдено</option>
+									<option value="in-progress">В процессе</option>
+									<option value="overdue">Просрочено</option>
+								</select>
+							</div>
+						</div>
+
+						<!-- Счетчик результатов -->
+						<div class="results-count">
+							<span id="resultsCount">0</span> сотрудников найдено
+						</div>
+
+						<div class="employees-list" id="employeesList">
+							<!-- Сотрудники будут загружены через hr-dashboard.js -->
+						</div>
+					</section>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/mock-db.js"></script>
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/modal.js"></script>
+		<script src="../scripts/hr-dashboard.js"></script>
+	</body>
+</html>

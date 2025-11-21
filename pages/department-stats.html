@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Статистика отдела | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<!-- Навигация-->
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<!-- Основной контент -->
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">Статистика отдела</h1>
+
+					<!-- Общая статистика отдела -->
+					<section class="card stats-card">
+						<div class="card-header">
+							<h2 class="card-title">Общая статистика IT-отдела</h2>
+						</div>
+						<div class="stats-grid">
+							<div class="stat-item">
+								<div class="stat-number" id="deptEmployees">0</div>
+								<div class="stat-label">Сотрудников в отделе</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-number" id="deptAvgProgress">0%</div>
+								<div class="stat-label">Средний прогресс</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-number" id="deptCompletedCourses">0</div>
+								<div class="stat-label">Завершенных курсов</div>
+							</div>
+							<div class="stat-item">
+								<div class="stat-number" id="deptOverdueCourses">0</div>
+								<div class="stat-label">Просроченных курсов</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Детальная статистика по сотрудникам -->
+					<section class="card employees-stats-card">
+						<div class="card-header">
+							<h2 class="card-title">Прогресс сотрудников</h2>
+						</div>
+						<div class="employees-stats-list" id="employeesStatsList">
+							<!-- Статистика по сотрудникам будет загружено через department-stats.js -->
+						</div>
+					</section>
+
+					<!-- Статистика по курсам -->
+					<section class="card courses-stats-card">
+						<div class="card-header">
+							<h2 class="card-title">Популярные курсы в отделе</h2>
+						</div>
+						<div class="courses-stats-list" id="coursesStatsList">
+							<!-- Статистика по курсам будет загружено через department-stats.js -->
+						</div>
+					</section>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/mock-db.js"></script>
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/department-stats.js"></script>
+	</body>
+</html>

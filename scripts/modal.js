@@ -43,7 +43,9 @@ class Modal {
 			}
 
 			// Закрытие по клику на фон или кнопку
-			modal.querySelector('.modal-overlay').addEventListener('click', closeModal)
+			modal
+				.querySelector('.modal-overlay')
+				.addEventListener('click', closeModal)
 			modal.querySelector('.modal-close').addEventListener('click', closeModal)
 			modal.querySelector('.modal-btn').addEventListener('click', closeModal)
 
@@ -81,9 +83,11 @@ class Modal {
 				}, 300)
 			}
 
-			modal.querySelector('.modal-btn-confirm').addEventListener('click', () => {
-				closeModal(true)
-			})
+			modal
+				.querySelector('.modal-btn-confirm')
+				.addEventListener('click', () => {
+					closeModal(true)
+				})
 
 			modal.querySelector('.modal-btn-cancel').addEventListener('click', () => {
 				closeModal(false)
@@ -173,6 +177,181 @@ class Modal {
 			success: 'Успешно',
 		}
 		return titles[type] || titles.info
+	}
+
+	/**
+	 * Показывает модальное окно с полем ввода
+	 * @param {string} message - Текст сообщения
+	 * @param {string} title - Заголовок
+	 * @param {string} placeholder - Плейсхолдер для input
+	 * @returns {Promise<string|null>} - Введенное значение или null если отменено
+	 */
+	prompt(message, title = 'Ввод данных', placeholder = 'Введите значение') {
+		return new Promise(resolve => {
+			const modal = document.createElement('div')
+			modal.className = 'modal'
+
+			modal.innerHTML = `
+				<div class="modal-overlay"></div>
+				<div class="modal-content">
+					<div class="modal-header">
+						<div class="modal-icon info">ℹ️</div>
+						<h3 class="modal-title">${title}</h3>
+						<button class="modal-close" aria-label="Закрыть">×</button>
+					</div>
+					<div class="modal-body">
+						<p>${message}</p>
+						<input type="text" id="modalPromptInput" class="modal-input" placeholder="${placeholder}">
+					</div>
+					<div class="modal-footer">
+						<button class="btn btn-secondary modal-btn-cancel">Отмена</button>
+						<button class="btn modal-btn-confirm">ОК</button>
+					</div>
+				</div>
+			`
+
+			this.modalContainer.appendChild(modal)
+
+			setTimeout(() => {
+				modal.classList.add('active')
+				const input = modal.querySelector('#modalPromptInput')
+				if (input) {
+					input.focus()
+					input.addEventListener('keydown', e => {
+						if (e.key === 'Enter') {
+							modal.querySelector('.modal-btn-confirm').click()
+						}
+					})
+				}
+			}, 10)
+
+			const closeModal = result => {
+				modal.classList.remove('active')
+				setTimeout(() => {
+					modal.remove()
+					resolve(result)
+				}, 300)
+			}
+
+			modal
+				.querySelector('.modal-btn-confirm')
+				.addEventListener('click', () => {
+					const input = modal.querySelector('#modalPromptInput')
+					closeModal(input ? input.value.trim() : null)
+				})
+
+			modal.querySelector('.modal-btn-cancel').addEventListener('click', () => {
+				closeModal(null)
+			})
+
+			modal.querySelector('.modal-overlay').addEventListener('click', () => {
+				closeModal(null)
+			})
+
+			modal.querySelector('.modal-close').addEventListener('click', () => {
+				closeModal(null)
+			})
+
+			const handleEscape = e => {
+				if (e.key === 'Escape') {
+					closeModal(null)
+					document.removeEventListener('keydown', handleEscape)
+				}
+			}
+			document.addEventListener('keydown', handleEscape)
+		})
+	}
+
+	/**
+	 * Показывает модальное окно с выбором из списка
+	 * @param {string} message - Текст сообщения
+	 * @param {Array} options - Массив объектов {id, label} или массив строк
+	 * @param {string} title - Заголовок модального окна
+	 * @returns {Promise} - Промис, который резолвится с выбранным значением или null
+	 */
+	select(message, options = [], title = 'Выбор') {
+		return new Promise(resolve => {
+			const modal = document.createElement('div')
+			modal.className = 'modal'
+			modal.innerHTML = `
+				<div class="modal-overlay"></div>
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3>${title}</h3>
+						<button class="modal-close" aria-label="Закрыть">×</button>
+					</div>
+					<div class="modal-body">
+						<p>${message}</p>
+						<select id="modalSelectInput" class="modal-select" size="8">
+							${options
+								.map(
+									opt =>
+										`<option value="${
+											typeof opt === 'object' ? opt.id : opt
+										}">${typeof opt === 'object' ? opt.label : opt}</option>`
+								)
+								.join('')}
+						</select>
+					</div>
+					<div class="modal-footer">
+						<button class="btn btn-secondary modal-btn-cancel">Отмена</button>
+						<button class="btn modal-btn-confirm">Выбрать</button>
+					</div>
+				</div>
+			`
+
+			this.modalContainer.appendChild(modal)
+
+			setTimeout(() => {
+				modal.classList.add('active')
+				const select = modal.querySelector('#modalSelectInput')
+				if (select && select.options.length > 0) {
+					select.focus()
+					select.addEventListener('keydown', e => {
+						if (e.key === 'Enter') {
+							modal.querySelector('.modal-btn-confirm').click()
+						}
+					})
+				}
+			}, 10)
+
+			const closeModal = result => {
+				modal.classList.remove('active')
+				setTimeout(() => {
+					modal.remove()
+					resolve(result)
+				}, 300)
+			}
+
+			modal
+				.querySelector('.modal-btn-confirm')
+				.addEventListener('click', () => {
+					const select = modal.querySelector('#modalSelectInput')
+					if (select && select.value) {
+						closeModal(select.value)
+					}
+				})
+
+			modal.querySelector('.modal-btn-cancel').addEventListener('click', () => {
+				closeModal(null)
+			})
+
+			modal.querySelector('.modal-overlay').addEventListener('click', () => {
+				closeModal(null)
+			})
+
+			modal.querySelector('.modal-close').addEventListener('click', () => {
+				closeModal(null)
+			})
+
+			const handleEscape = e => {
+				if (e.key === 'Escape') {
+					closeModal(null)
+					document.removeEventListener('keydown', handleEscape)
+				}
+			}
+			document.addEventListener('keydown', handleEscape)
+		})
 	}
 }
 
@@ -323,29 +502,52 @@ style.textContent = `
 		min-width: 120px;
 	}
 
-	@media (max-width: 768px) {
-		.modal-content {
-			width: 95%;
-			max-height: 85vh;
-		}
+	.modal-input {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		margin-top: 1rem;
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius);
+		color: var(--text-light);
+		font-size: 1rem;
+		transition: all 0.3s ease;
+		outline: none;
+	}
 
-		.modal-header {
-			padding: 1rem;
-		}
+	.modal-input:focus {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: var(--primary);
+		box-shadow: 0 0 0 3px rgba(0, 89, 255, 0.2);
+	}
 
-		.modal-body {
-			padding: 1rem;
-		}
+	.modal-input::placeholder {
+		color: var(--text-muted);
+	}
 
-		.modal-footer {
-			padding: 1rem;
-			flex-direction: column;
-		}
+	.modal-select {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		margin-top: 1rem;
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius);
+		color: var(--text-light);
+		font-size: 1rem;
+		transition: all 0.3s ease;
+		outline: none;
+	}
 
-		.modal-footer .btn {
-			width: 100%;
-		}
+	.modal-select:focus {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: var(--primary);
+		box-shadow: 0 0 0 3px rgba(0, 89, 255, 0.2);
+	}
+
+	.modal-select option {
+		background: var(--background-light);
+		color: var(--text-light);
+		padding: 0.5rem;
 	}
 `
 document.head.appendChild(style)
-

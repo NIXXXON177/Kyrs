@@ -293,6 +293,157 @@ class AuthManager {
 			},
 		]
 
+		// Курсы для HR менеджера
+		const hrCourses = [
+			{
+				id: 9,
+				title: 'Управление персоналом',
+				status: 'пройден',
+				start_date: '2024-02-01',
+				due_date: '2025-02-01',
+				progress: 100,
+				description: 'Основы управления человеческими ресурсами',
+				modules: [
+					{
+						title: 'Введение в HR',
+						type: 'video',
+						duration: '20 мин',
+						completed: true,
+						content: 'Роль HR в современной организации...',
+					},
+					{
+						title: 'Подбор персонала',
+						type: 'text',
+						duration: '30 мин',
+						completed: true,
+						content: 'Процессы рекрутинга и отбора...',
+					},
+				],
+			},
+			{
+				id: 10,
+				title: 'Трудовое законодательство',
+				status: 'в процессе',
+				start_date: '2025-01-15',
+				due_date: '2025-04-15',
+				progress: 60,
+				description: 'Актуальные нормы трудового права',
+				modules: [
+					{
+						title: 'Основы ТК РФ',
+						type: 'video',
+						duration: '45 мин',
+						completed: true,
+						content: 'Ключевые положения Трудового кодекса...',
+					},
+					{
+						title: 'Охрана труда',
+						type: 'text',
+						duration: '35 мин',
+						completed: false,
+						content: 'Требования к охране труда...',
+					},
+				],
+			},
+			{
+				id: 11,
+				title: 'Мотивация и развитие сотрудников',
+				status: 'назначен',
+				start_date: '2025-03-01',
+				due_date: '2025-06-01',
+				progress: 0,
+				description: 'Системы мотивации и карьерного роста',
+				modules: [
+					{
+						title: 'Теории мотивации',
+						type: 'video',
+						duration: '40 мин',
+						completed: false,
+						content: 'Теории Маслоу, Герцберга...',
+					},
+				],
+			},
+		]
+
+		// Курсы для руководителя отдела
+		const managerCourses = [
+			{
+				id: 12,
+				title: 'Управление IT-проектами',
+				status: 'пройден',
+				start_date: '2024-03-01',
+				due_date: '2025-03-01',
+				progress: 100,
+				description: 'Методологии управления проектами в IT',
+				modules: [
+					{
+						title: 'Agile и Scrum',
+						type: 'video',
+						duration: '50 мин',
+						completed: true,
+						content: 'Основы гибких методологий...',
+					},
+					{
+						title: 'Планирование проектов',
+						type: 'text',
+						duration: '40 мин',
+						completed: true,
+						content: 'Создание плана проекта...',
+					},
+				],
+			},
+			{
+				id: 13,
+				title: 'Лидерство и управление командой',
+				status: 'в процессе',
+				start_date: '2025-02-01',
+				due_date: '2025-05-01',
+				progress: 75,
+				description: 'Навыки эффективного руководства',
+				modules: [
+					{
+						title: 'Стили лидерства',
+						type: 'video',
+						duration: '45 мин',
+						completed: true,
+						content: 'Авторитарный, демократический стили...',
+					},
+					{
+						title: 'Мотивация команды',
+						type: 'text',
+						duration: '35 мин',
+						completed: true,
+						content: 'Как мотивировать сотрудников...',
+					},
+					{
+						title: 'Конфликтология',
+						type: 'video',
+						duration: '40 мин',
+						completed: false,
+						content: 'Управление конфликтами в команде...',
+					},
+				],
+			},
+			{
+				id: 14,
+				title: 'Стратегическое планирование',
+				status: 'назначен',
+				start_date: '2025-04-01',
+				due_date: '2025-07-01',
+				progress: 0,
+				description: 'Разработка стратегии развития отдела',
+				modules: [
+					{
+						title: 'SWOT-анализ',
+						type: 'text',
+						duration: '30 мин',
+						completed: false,
+						content: 'Методика SWOT-анализа...',
+					},
+				],
+			},
+		]
+
 		const mockUsers = {
 			petrov: {
 				password: 'password123',
@@ -318,6 +469,32 @@ class AuthManager {
 					},
 					courses: commonCourses,
 					progress: this.calculateOverallProgress(commonCourses),
+				},
+			},
+			sidorova: {
+				password: 'password123',
+				userData: {
+					employee: {
+						name: 'Сидорова Анна Михайловна',
+						position: 'HR менеджер',
+						department: 'Отдел кадров',
+						email: 'a.sidorova@technoline.ru',
+					},
+					courses: [], // HR не проходят курсы - только назначают их
+					progress: 0,
+				},
+			},
+			kuznetsov: {
+				password: 'password123',
+				userData: {
+					employee: {
+						name: 'Кузнецов Дмитрий Александрович',
+						position: 'руководитель отдела',
+						department: 'IT-отдел',
+						email: 'd.kuznetsov@technoline.ru',
+					},
+					courses: [], // Руководитель не проходят курсы - только смотрит успеваемость
+					progress: 0,
 				},
 			},
 		}

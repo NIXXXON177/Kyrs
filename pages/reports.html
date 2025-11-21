@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Отчеты | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<!-- Навигация-->
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<!-- Основной контент -->
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">Отчеты по обучению</h1>
+
+					<!-- Панель отчетов -->
+					<section class="card reports-card">
+						<div class="card-header">
+							<h2 class="card-title">Генерация отчетов</h2>
+						</div>
+						<div class="reports-grid">
+							<div class="report-item">
+								<h3>Отчет по сотрудникам</h3>
+								<p>Список всех сотрудников с их курсами и прогрессом</p>
+								<button
+									class="btn btn-primary"
+									onclick="generateEmployeeReport()"
+								>
+									📊 Сгенерировать
+								</button>
+							</div>
+							<div class="report-item">
+								<h3>Отчет по курсам</h3>
+								<p>Статистика прохождения курсов по отделам</p>
+								<button
+									class="btn btn-primary"
+									onclick="generateCoursesReport()"
+								>
+									📈 Сгенерировать
+								</button>
+							</div>
+							<div class="report-item">
+								<h3>Отчет о просроченных курсах</h3>
+								<p>Курсы, требующие внимания</p>
+								<button
+									class="btn btn-primary"
+									onclick="generateOverdueReport()"
+								>
+									⚠️ Сгенерировать
+								</button>
+							</div>
+							<div class="report-item">
+								<h3>Общий отчет по обучению</h3>
+								<p>Сводная статистика по всей компании</p>
+								<button
+									class="btn btn-primary"
+									onclick="generateSummaryReport()"
+								>
+									📋 Сгенерировать
+								</button>
+							</div>
+						</div>
+					</section>
+
+					<!-- Предварительный просмотр отчета -->
+					<section
+						class="card preview-card"
+						id="reportPreview"
+						style="display: none"
+					>
+						<div class="card-header">
+							<h2 class="card-title">Предварительный просмотр</h2>
+							<button class="btn btn-outline" onclick="printReport()">
+								🖨️ Печать
+							</button>
+						</div>
+						<div class="report-content" id="reportContent">
+							<!-- Содержимое отчета будет загружено сюда -->
+						</div>
+					</section>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/mock-db.js"></script>
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/reports.js"></script>
+	</body>
+</html>

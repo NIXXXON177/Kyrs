@@ -16,75 +16,210 @@
 
 @import url('utilities.css');
 
-@import url('responsive.css');
-
 /* Стили для печати */
 @media print {
-	/* Скрываем все элементы кроме контента для печати */
-	body * {
+	/* Скрываем навигацию и ненужные элементы */
+	.navbar,
+	.nav-toggle,
+	.btn-logout,
+	.user-section,
+	.notifications-container,
+	.glass-bubble,
+	.nav-menu,
+	.nav-container,
+	.nav-logo,
+	.no-print,
+	button:not(.print-only),
+	.btn:not(.print-only),
+	.form-actions,
+	.course-management-actions,
+	.employee-actions,
+	.task-actions,
+	.actions-card,
+	.filters,
+	.filter-select,
+	.search-input,
+	.btn-link,
+	.modal,
+	.modal-overlay,
+	.modal-content,
+	.employee-search-container,
+	.employee-search-input,
+	.employee-select-indicator,
+	.courses-header #printCoursesBtn,
+	.courses-header #printCertificatesBtn,
+	.card-header .btn,
+	.card-header .btn-link,
+	select,
+	input[type='text']:not(.print-only),
+	input[type='search']:not(.print-only),
+	textarea:not(.print-only),
+	.employee-selection-modal,
+	.course-management-card .course-management-actions {
+		display: none !important;
 		visibility: hidden !important;
 	}
 
-	#printContent,
-	#printContent * {
-		visibility: visible !important;
+	/* Показываем только нужный контент */
+	body {
+		overflow: visible !important;
+		background: white !important;
 	}
 
+	/* Если есть контейнер для печати, скрываем основной контент */
 	#printContent {
-		position: static !important;
 		display: block !important;
-		left: 0 !important;
+		visibility: visible !important;
+		position: absolute !important;
 		top: 0 !important;
+		left: 0 !important;
 		width: 100% !important;
 		max-width: none !important;
 		margin: 0 !important;
-		padding: 20px !important;
+		padding: 20mm !important;
 		box-sizing: border-box !important;
 		background: white !important;
 		color: black !important;
+		z-index: 99999 !important;
+		min-height: 100vh !important;
 	}
 
-	/* Стили для печатного документа */
+	/* Скрываем основной контент, если есть #printContent */
+	body:has(#printContent) .main-content,
+	body:has(#printContent) .navbar,
+	body:has(#printContent) #app > *:not(#printContent),
+	body:has(#printContent) header,
+	body:has(#printContent) footer {
+		display: none !important;
+		visibility: hidden !important;
+		height: 0 !important;
+		overflow: hidden !important;
+	}
+
+	/* Если нет #printContent, показываем основной контент */
+	.main-content {
+		display: block !important;
+		visibility: visible !important;
+	}
+
+	.main-content * {
+		visibility: visible !important;
+	}
+
+	/* Основные настройки для печати */
 	body {
 		background: white !important;
 		color: black !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		font-size: 12pt !important;
+		line-height: 1.4 !important;
+	}
+
+	/* Контейнер для печати - улучшенная версия */
+	#printContent {
+		position: absolute !important;
+		top: 0 !important;
+		left: 0 !important;
+		width: 100% !important;
+		max-width: none !important;
+		margin: 0 !important;
+		padding: 20mm !important;
+		box-sizing: border-box !important;
+		background: white !important;
+		color: black !important;
+		z-index: 99999 !important;
+		display: block !important;
+		visibility: visible !important;
+	}
+
+	/* Скрываем основной контент, если есть #printContent */
+	body:has(#printContent) .main-content,
+	body:has(#printContent) .navbar,
+	body:has(#printContent) #app > *:not(#printContent) {
+		display: none !important;
+		visibility: hidden !important;
+	}
+
+	/* Заголовки */
+	.page-title,
+	h1,
+	h2,
+	h3,
+	h4 {
+		color: black !important;
+		font-weight: bold !important;
+		page-break-after: avoid !important;
 	}
 
 	.page-title {
-		color: black !important;
-		font-size: 24px !important;
-		margin-bottom: 20px !important;
+		font-size: 24pt !important;
+		margin-bottom: 15pt !important;
 		text-align: center !important;
+		border-bottom: 2px solid #000 !important;
+		padding-bottom: 10pt !important;
 	}
 
+	h2 {
+		font-size: 18pt !important;
+		margin-top: 15pt !important;
+		margin-bottom: 10pt !important;
+	}
+
+	h3 {
+		font-size: 14pt !important;
+		margin-top: 12pt !important;
+		margin-bottom: 8pt !important;
+	}
+
+	/* Карточки */
 	.card {
 		border: 1px solid #ccc !important;
 		background: white !important;
 		box-shadow: none !important;
-		margin-bottom: 20px !important;
-		break-inside: avoid;
+		margin-bottom: 15pt !important;
+		padding: 15pt !important;
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
 	}
 
+	.card-header {
+		border-bottom: 1px solid #ccc !important;
+		margin-bottom: 10pt !important;
+		padding-bottom: 8pt !important;
+	}
+
+	.card-title {
+		color: black !important;
+		font-size: 16pt !important;
+	}
+
+	/* Курсы */
 	.course-card {
 		border: 1px solid #ddd !important;
-		padding: 15px !important;
-		margin-bottom: 10px !important;
+		padding: 12pt !important;
+		margin-bottom: 10pt !important;
 		background: white !important;
-		break-inside: avoid;
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
 	}
 
 	.course-title {
 		color: black !important;
-		font-size: 18px !important;
-		margin-bottom: 10px !important;
+		font-size: 14pt !important;
+		font-weight: bold !important;
+		margin-bottom: 8pt !important;
 	}
 
 	.course-status {
 		display: inline-block !important;
-		padding: 2px 8px !important;
-		border-radius: 4px !important;
-		font-size: 12px !important;
-		margin-bottom: 10px !important;
+		padding: 3pt 8pt !important;
+		border-radius: 3pt !important;
+		font-size: 10pt !important;
+		margin-bottom: 8pt !important;
+		font-weight: bold !important;
 	}
 
 	.status-completed {
@@ -108,104 +243,1592 @@
 	}
 
 	.course-meta {
-		font-size: 12px !important;
-		color: #666 !important;
+		font-size: 11pt !important;
+		color: #333 !important;
 	}
 
 	.course-meta p {
-		margin: 2px 0 !important;
+		margin: 3pt 0 !important;
 	}
 
-	/* Заголовок для печати */
+	.course-meta strong {
+		color: black !important;
+		font-weight: bold !important;
+	}
+
+	/* Настройки страницы */
 	@page {
-		margin: 1cm;
+		margin: 15mm 20mm;
 		size: A4;
 	}
 
-	/* Добавляем заголовок страницы */
-	body:before {
-		content: 'Итоговый отчет по курсам - ТехноЛайн';
-		display: block;
-		font-size: 18px;
-		font-weight: bold;
-		text-align: center;
-		margin-bottom: 20px;
-		border-bottom: 2px solid #000;
-		padding-bottom: 10px;
+	/* Разрывы страниц */
+	.page-break {
+		page-break-before: always !important;
 	}
 
-	/* Информация о пользователе в начале */
-	.print-user-info {
-		border: 1px solid #ccc;
-		padding: 15px;
-		margin-bottom: 20px;
-		background: #f9f9f9;
+	.no-break {
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
 	}
 
-	.print-user-info h3 {
-		margin-top: 0;
-		color: black;
+	/* Таблицы */
+	table {
+		width: 100% !important;
+		border-collapse: collapse !important;
+		margin: 10pt 0 !important;
+		page-break-inside: auto !important;
 	}
 
-	.print-user-info p {
-		margin: 5px 0;
-		color: black;
+	table tr {
+		page-break-inside: avoid !important;
+		page-break-after: auto !important;
 	}
 
-	/* Стили для сертификатов */
+	table thead {
+		display: table-header-group !important;
+	}
+
+	table tfoot {
+		display: table-footer-group !important;
+	}
+
+	table th,
+	table td {
+		border: 1px solid #ccc !important;
+		padding: 8pt !important;
+		text-align: left !important;
+		color: black !important;
+		background: white !important;
+	}
+
+	table th {
+		background: #f5f5f5 !important;
+		font-weight: bold !important;
+		color: black !important;
+	}
+
+	/* Прогресс-бары */
+	.progress-bar,
+	.progress-container {
+		border: 1px solid #ccc !important;
+		background: #f0f0f0 !important;
+		height: 20pt !important;
+		margin: 8pt 0 !important;
+	}
+
+	.progress-fill {
+		background: #0059ff !important;
+		height: 100% !important;
+		display: block !important;
+	}
+
+	.progress-label {
+		color: black !important;
+		font-size: 11pt !important;
+		margin-bottom: 5pt !important;
+	}
+
+	/* Информация о пользователе */
+	.print-user-info,
+	.employee-info {
+		border: 1px solid #ccc !important;
+		padding: 12pt !important;
+		margin-bottom: 15pt !important;
+		background: #f9f9f9 !important;
+		page-break-inside: avoid !important;
+	}
+
+	.print-user-info h3,
+	.employee-info h3 {
+		margin-top: 0 !important;
+		color: black !important;
+		font-size: 14pt !important;
+	}
+
+	.print-user-info p,
+	.employee-info p {
+		margin: 4pt 0 !important;
+		color: black !important;
+		font-size: 11pt !important;
+	}
+
+	/* Списки */
+	ul,
+	ol {
+		margin: 8pt 0 !important;
+		padding-left: 20pt !important;
+		color: black !important;
+	}
+
+	li {
+		margin: 3pt 0 !important;
+		color: black !important;
+	}
+
+	/* Ссылки */
+	a {
+		color: black !important;
+		text-decoration: underline !important;
+	}
+
+	a[href]:after {
+		content: ' (' attr(href) ')';
+		font-size: 9pt;
+		color: #666;
+	}
+
+	/* Изображения */
+	img {
+		max-width: 100% !important;
+		height: auto !important;
+		page-break-inside: avoid !important;
+	}
+
+	/* Кнопки и формы (скрываем) */
+	button:not(.print-only),
+	.btn:not(.print-only),
+	input[type='button']:not(.print-only),
+	input[type='submit']:not(.print-only),
+	input[type='reset']:not(.print-only),
+	.form-actions,
+	.course-management-actions,
+	.employee-actions,
+	.task-actions,
+	.actions-card,
+	.card-header .btn,
+	.card-header .btn-link,
+	select,
+	.filter-select,
+	.search-input {
+		display: none !important;
+		visibility: hidden !important;
+	}
+
+	/* Специальные элементы для печати */
+	.print-only {
+		display: block !important;
+		visibility: visible !important;
+	}
+
+	.no-print {
+		display: none !important;
+		visibility: hidden !important;
+		page-break-inside: avoid !important;
+	}
+
+	/* Скрываем элементы управления курсами при печати */
+	.course-management-header .course-management-actions,
+	.card-header .btn,
+	.card-header .btn-link,
+	.courses-header #printCoursesBtn,
+	.courses-header #printCertificatesBtn {
+		display: none !important;
+	}
+
+	/* Сертификаты - оптимизировано для одного листа A4 */
+	.certificate,
+	.certificate-container {
+		page-break-after: always !important;
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
+		border: 2px solid #000 !important;
+		padding: 15mm !important;
+		margin: 0 !important;
+		background: white !important;
+		height: 270mm !important;
+		max-height: 270mm !important;
+		box-sizing: border-box !important;
+		display: flex !important;
+		flex-direction: column !important;
+		justify-content: space-between !important;
+		overflow: hidden !important;
+	}
+
 	.certificate-title {
 		color: #2e7d32 !important;
-		font-size: 24px !important;
+		font-size: 20pt !important;
 		font-weight: bold !important;
 		text-align: center !important;
-		margin: 40px 0 10px 0 !important;
+		margin: 10pt 0 8pt 0 !important;
 		text-transform: uppercase !important;
 		border-bottom: 2px solid #4caf50 !important;
-		padding-bottom: 10px !important;
+		padding-bottom: 6pt !important;
+		line-height: 1.2 !important;
 	}
 
-	.certificate-course-title {
-		color: #000 !important;
-		font-size: 20px !important;
-		font-weight: bold !important;
+	.certificate-content {
 		text-align: center !important;
-		margin: 20px 0 !important;
-		text-transform: uppercase !important;
+		color: black !important;
+		font-size: 11pt !important;
+		line-height: 1.5 !important;
+		margin: 12pt 0 !important;
 	}
 
-	.certificate-info {
-		background: #f0f8f0 !important;
-		padding: 20px !important;
-		border-radius: 8px !important;
-		margin: 20px 0 !important;
-		border-left: 4px solid #4caf50 !important;
+	.certificate-name {
+		font-size: 16pt !important;
+		font-weight: bold !important;
+		color: black !important;
+		margin: 12pt 0 !important;
+		text-align: center !important;
+		line-height: 1.3 !important;
 	}
 
-	.certificate-decoration {
-		position: absolute !important;
-		top: 15px !important;
-		right: 15px !important;
-		width: 60px !important;
-		height: 60px !important;
-		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%) !important;
-		border-radius: 50% !important;
+	.certificate-course {
+		font-size: 14pt !important;
+		color: #2e7d32 !important;
+		font-weight: bold !important;
+		margin: 10pt 0 !important;
+		text-align: center !important;
+		line-height: 1.3 !important;
+	}
+
+	.certificate-date {
+		font-size: 10pt !important;
+		color: #666 !important;
+		margin-top: 12pt !important;
+		text-align: center !important;
+	}
+
+	.certificate-signature {
+		margin-top: 20pt !important;
 		display: flex !important;
-		align-items: center !important;
-		justify-content: center !important;
-		font-size: 24px !important;
-		color: white !important;
-		font-weight: bold !important;
+		justify-content: space-around !important;
+		flex-shrink: 0 !important;
 	}
 
-	.certificate-number {
-		position: absolute !important;
-		top: 15px !important;
-		left: 15px !important;
-		background: #4caf50 !important;
-		color: white !important;
-		padding: 5px 12px !important;
-		border-radius: 20px !important;
-		font-size: 12px !important;
-		font-weight: bold !important;
+	.certificate-signature div {
+		text-align: center !important;
+		border-top: 1px solid #000 !important;
+		padding-top: 4pt !important;
+		width: 40% !important;
+		font-size: 9pt !important;
+		color: black !important;
 	}
+
+	/* Уменьшаем отступы в сертификате */
+	.certificate > div,
+	.certificate > h3,
+	.certificate > h4,
+	.certificate > p {
+		margin-top: 8pt !important;
+		margin-bottom: 8pt !important;
+	}
+
+	.certificate > div[style*='padding'] {
+		padding: 12pt !important;
+		margin: 8pt 0 !important;
+	}
+
+	/* Отчеты */
+	.report-section {
+		page-break-inside: avoid !important;
+		margin-bottom: 15pt !important;
+	}
+
+	.report-header {
+		background: #f5f5f5 !important;
+		padding: 15pt !important;
+		border: 1px solid #ccc !important;
+		margin-bottom: 15pt !important;
+		border-radius: 4pt !important;
+	}
+
+	.report-header h1 {
+		margin: 0 0 10pt 0 !important;
+		color: black !important;
+		font-size: 20pt !important;
+	}
+
+	.report-footer {
+		margin-top: 20pt !important;
+		padding-top: 10pt !important;
+		border-top: 2px solid #000 !important;
+		text-align: center !important;
+		font-size: 9pt !important;
+		color: #666 !important;
+	}
+
+	.report-table {
+		width: 100% !important;
+		border-collapse: collapse !important;
+		margin: 15pt 0 !important;
+		font-size: 10pt !important;
+	}
+
+	.report-table th {
+		background: #f5f5f5 !important;
+		padding: 8pt !important;
+		border: 1px solid #ccc !important;
+		text-align: left !important;
+		font-weight: bold !important;
+		color: black !important;
+	}
+
+	.report-table td {
+		padding: 6pt 8pt !important;
+		border: 1px solid #ddd !important;
+		color: black !important;
+	}
+
+	.report-table tr:nth-child(even) {
+		background: #f9f9f9 !important;
+	}
+
+	/* Статистика */
+	.stats-grid,
+	.stats-item {
+		page-break-inside: avoid !important;
+	}
+
+	.stats-value {
+		font-size: 18pt !important;
+		font-weight: bold !important;
+		color: black !important;
+	}
+
+	.stats-label {
+		font-size: 10pt !important;
+		color: #666 !important;
+	}
+
+	/* Улучшенная типографика для печати */
+	p {
+		margin: 6pt 0 !important;
+		color: black !important;
+		line-height: 1.5 !important;
+	}
+
+	strong,
+	b {
+		font-weight: bold !important;
+		color: black !important;
+	}
+
+	em,
+	i {
+		font-style: italic !important;
+	}
+
+	/* Убираем градиенты и эффекты для печати */
+	* {
+		background-image: none !important;
+		text-shadow: none !important;
+		box-shadow: none !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+	}
+
+	/* Убираем анимации при печати */
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+	}
+
+	/* Улучшаем читаемость текста */
+	body,
+	#printContent {
+		font-family: 'Times New Roman', Times, serif !important;
+		line-height: 1.5 !important;
+	}
+
+	/* Убираем лишние отступы */
+	.card-header {
+		margin-bottom: 10pt !important;
+		padding-bottom: 8pt !important;
+	}
+
+	/* Улучшаем отображение таблиц */
+	table {
+		border: 1px solid #000 !important;
+	}
+
+	table th {
+		background: #f0f0f0 !important;
+		border: 1px solid #000 !important;
+	}
+
+	table td {
+		border: 1px solid #ccc !important;
+	}
+
+	/* Улучшаем отображение карточек */
+	.card,
+	.course-card,
+	.course-management-card {
+		border: 1px solid #000 !important;
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
+		margin-bottom: 15pt !important;
+	}
+
+	/* Улучшаем читаемость */
+	::selection {
+		background: #f0f0f0 !important;
+		color: black !important;
+	}
+
+	/* Стили для элементов внутри #printContent */
+	#printContent h1,
+	#printContent h2,
+	#printContent h3,
+	#printContent h4 {
+		color: black !important;
+		font-weight: bold !important;
+		page-break-after: avoid !important;
+	}
+
+	#printContent p {
+		color: black !important;
+		margin: 6pt 0 !important;
+	}
+
+	#printContent .card,
+	#printContent .course-card {
+		border: 1px solid #000 !important;
+		background: white !important;
+		page-break-inside: avoid !important;
+	}
+
+	/* Убираем все эффекты для элементов печати */
+	#printContent * {
+		background-image: none !important;
+		text-shadow: none !important;
+		box-shadow: none !important;
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+	}
+
+	/* Улучшаем отображение сертификатов */
+	#printContent .certificate,
+	#printContent .certificate-container {
+		page-break-after: always !important;
+		page-break-inside: avoid !important;
+	}
+}
+
+/* Стили для HR Dashboard */
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1rem;
+	margin-bottom: 2rem;
+}
+
+.stat-item {
+	text-align: center;
+	padding: 1.5rem;
+	background: var(--accent-gradient);
+	color: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+	font-size: 2.5rem;
+	font-weight: bold;
+	display: block;
+	margin-bottom: 0.5rem;
+}
+
+.stat-label {
+	font-size: 0.9rem;
+	opacity: 0.9;
+}
+
+.employee-card {
+	margin-bottom: 1rem;
+	padding: 1.5rem;
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	background: var(--glass-bg);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.employee-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.employee-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+}
+
+.employee-info h3 {
+	margin: 0 0 0.5rem 0;
+	color: var(--text-light);
+}
+
+.employee-info p {
+	margin: 0.25rem 0;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.progress-circle {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background: conic-gradient(#4caf50 calc(var(--progress) * 1%), #e0e0e0 0deg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+	color: #333;
+}
+
+.progress-text {
+	font-size: 0.8rem;
+}
+
+.employee-courses-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 1rem;
+	margin-bottom: 1rem;
+}
+
+.summary-item {
+	text-align: center;
+}
+
+.summary-label {
+	font-size: 0.8rem;
+	color: #666;
+	display: block;
+	margin-bottom: 0.25rem;
+}
+
+.summary-value {
+	font-weight: bold;
+	font-size: 1.1rem;
+}
+
+/* Счетчик результатов для HR-дашборда */
+.results-count {
+	padding: 1rem 0;
+	margin-bottom: 1rem;
+	font-size: 0.95rem;
+	color: var(--text-muted);
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.results-count span {
+	font-weight: 600;
+	color: var(--text-light);
+}
+
+/* Список сотрудников */
+.employees-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+	gap: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+.employee-card {
+	transition: all 0.3s ease;
+}
+
+.employee-card:hover {
+	transform: translateY(-3px);
+	box-shadow: var(--glass-shadow), var(--accent-glow);
+}
+
+.employee-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1.5rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.employee-actions {
+	display: flex;
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.btn-sm {
+	padding: 0.5rem 1rem;
+	font-size: 0.9rem;
+}
+
+.summary-value.completed {
+	color: #4caf50;
+}
+
+.summary-value.in-progress {
+	color: #ff9800;
+}
+
+.summary-value.overdue {
+	color: #f44336;
+}
+
+.employee-actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: flex-end;
+}
+
+/* Стили для отчетов */
+.reports-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 1.5rem;
+	margin-bottom: 2rem;
+}
+
+.report-item {
+	padding: 1.5rem;
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	background: var(--glass-bg);
+	text-align: center;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.report-item:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.report-item h3 {
+	margin: 0 0 0.5rem 0;
+	color: var(--text-light);
+}
+
+.report-item p {
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+	font-size: 0.9rem;
+}
+
+.report-content {
+	max-height: 70vh;
+	overflow-y: auto;
+}
+
+.report-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1rem 0;
+	font-size: 0.9rem;
+}
+
+.report-table th,
+.report-table td {
+	padding: 0.75rem;
+	text-align: left;
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.report-table th {
+	background: var(--glass-bg);
+	font-weight: bold;
+	color: var(--text-light);
+}
+
+.report-table tr:hover {
+	background: var(--glass-bg);
+}
+
+/* Стили для управления командой */
+.management-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 1.5rem;
+	margin-bottom: 2rem;
+}
+
+.management-item {
+	padding: 1.5rem;
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	background: var(--glass-bg);
+	text-align: center;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.management-item:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.management-item h3 {
+	margin: 0 0 0.5rem 0;
+	color: var(--text-light);
+}
+
+.management-item p {
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+	font-size: 0.9rem;
+}
+
+.task-card {
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin-bottom: 1rem;
+	background: var(--glass-bg);
+	transition: all 0.2s;
+}
+
+.task-card.task-completed {
+	border-left: 4px solid var(--primary);
+	background: linear-gradient(
+		135deg,
+		rgba(76, 175, 80, 0.1) 0%,
+		var(--glass-bg) 100%
+	);
+	backdrop-filter: blur(25px) saturate(180%);
+	-webkit-backdrop-filter: blur(25px) saturate(180%);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+}
+
+.task-card.task-in-progress {
+	border-left: 4px solid var(--primary-light);
+	background: linear-gradient(
+		135deg,
+		rgba(255, 152, 0, 0.1) 0%,
+		var(--glass-bg) 100%
+	);
+	backdrop-filter: blur(25px) saturate(180%);
+	-webkit-backdrop-filter: blur(25px) saturate(180%);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+}
+
+.task-card.task-assigned {
+	border-left: 4px solid var(--primary);
+	background: linear-gradient(
+		135deg,
+		rgba(33, 150, 243, 0.1) 0%,
+		var(--glass-bg) 100%
+	);
+	backdrop-filter: blur(25px) saturate(180%);
+	-webkit-backdrop-filter: blur(25px) saturate(180%);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+}
+
+.task-card.task-planned {
+	border-left: 4px solid var(--primary-light);
+	background: linear-gradient(
+		135deg,
+		rgba(156, 39, 176, 0.1) 0%,
+		var(--glass-bg) 100%
+	);
+	backdrop-filter: blur(25px) saturate(180%);
+	-webkit-backdrop-filter: blur(25px) saturate(180%);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+}
+
+.task-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+}
+
+.task-title {
+	margin: 0;
+	color: var(--text-light);
+	font-size: 1.1rem;
+}
+
+.task-badges {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.task-badge {
+	padding: 0.25rem 0.5rem;
+	border-radius: 12px;
+	font-size: 0.8rem;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.task-badge.priority-высокий {
+	background: #ffebee;
+	color: var(--primary);
+}
+
+.task-badge.priority-средний {
+	background: #fff3e0;
+	color: #ef6c00;
+}
+
+.task-badge.status-завершен {
+	background: #e8f5e8;
+	color: #2e7d32;
+}
+
+.task-badge.status-в-процессе {
+	background: #fff3e0;
+	color: #ef6c00;
+}
+
+.task-badge.status-назначен {
+	background: #e3f2fd;
+	color: #1565c0;
+}
+
+.task-badge.status-запланирован {
+	background: #f3e5f5;
+	color: #6a1b9a;
+}
+
+.task-description {
+	color: #666;
+	margin-bottom: 1rem;
+	line-height: 1.4;
+}
+
+.task-meta {
+	margin-bottom: 1rem;
+}
+
+.task-actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: flex-end;
+}
+
+.plan-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin-bottom: 1.5rem;
+	background: var(--glass-bg);
+}
+
+.plan-quarter {
+	margin: 0 0 1rem 0;
+	color: #333;
+	font-size: 1.2rem;
+	border-bottom: 2px solid #667eea;
+	padding-bottom: 0.5rem;
+}
+
+.plan-content {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 2rem;
+}
+
+.plan-section h4 {
+	margin: 0 0 0.5rem 0;
+	color: #555;
+	font-size: 1rem;
+}
+
+.plan-goals,
+.plan-initiatives {
+	margin: 0;
+	padding-left: 1.5rem;
+}
+
+.plan-goals li,
+.plan-initiatives li {
+	margin-bottom: 0.5rem;
+	line-height: 1.4;
+	color: #666;
+}
+
+/* Стили для статистики отдела */
+.employee-stat-card {
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin-bottom: 1rem;
+	background: var(--glass-bg);
+}
+
+.employee-stat-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.employee-stat-info h4 {
+	margin: 0 0 0.25rem 0;
+	color: var(--text-light);
+}
+
+.employee-stat-info p {
+	margin: 0;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.employee-stat-progress {
+	position: relative;
+	width: 120px;
+	height: 24px;
+	background: var(--glass-bg);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.employee-stat-progress.progress-low .progress-bar {
+	background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+
+.employee-stat-progress.progress-medium .progress-bar {
+	background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+
+.employee-stat-progress.progress-high .progress-bar {
+	background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+
+.employee-stat-progress .progress-bar {
+	height: 100%;
+	transition: width 0.3s ease;
+}
+
+.employee-stat-progress .progress-text {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 0.8rem;
+	font-weight: bold;
+	color: var(--text-light);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.employee-stat-details {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 1rem;
+}
+
+.stat-detail {
+	text-align: center;
+}
+
+.detail-label {
+	display: block;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	margin-bottom: 0.25rem;
+}
+
+.detail-value {
+	font-weight: bold;
+	font-size: 1.1rem;
+}
+
+.detail-value.completed {
+	color: var(--primary);
+}
+
+.detail-value.in-progress {
+	color: var(--primary);
+}
+
+.detail-value.overdue {
+	color: var(--primary);
+}
+
+.course-stat-card {
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin-bottom: 1rem;
+	background: var(--glass-bg);
+}
+
+.course-stat-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.course-stat-header h4 {
+	margin: 0;
+	color: var(--text-light);
+	flex: 1;
+}
+
+.course-completion-rate {
+	position: relative;
+	width: 150px;
+	height: 20px;
+	background: var(--glass-bg);
+	border-radius: 10px;
+	overflow: hidden;
+	margin-left: 1rem;
+}
+
+.completion-bar {
+	height: 100%;
+	background: linear-gradient(90deg, var(--primary), var(--primary-light));
+	transition: width 0.3s ease;
+}
+
+.completion-text {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 0.7rem;
+	font-weight: bold;
+	color: var(--text-light);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.course-stat-details {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 1rem;
+}
+
+/* Стили для управления курсами */
+.course-management-card {
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin-bottom: 1rem;
+	background: var(--glass-bg);
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-management-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.course-management-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+}
+
+.course-management-info h3 {
+	margin: 0 0 0.5rem 0;
+	color: var(--text-light);
+	font-size: 1.1rem;
+}
+
+.course-management-info p {
+	margin: 0.25rem 0;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.course-management-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-top: 0.5rem;
+}
+
+.course-management-meta .meta-item {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+.type-badge {
+	padding: 0.25rem 0.5rem;
+	border-radius: 12px;
+	font-size: 0.8rem;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.type-badge.обязательный {
+	background: var(--glass-bg);
+	color: var(--primary);
+}
+
+.type-badge.рекомендованный {
+	background: var(--glass-bg);
+	color: var(--primary);
+}
+
+.course-management-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+.btn-sm {
+	padding: 0.5rem 1rem;
+	font-size: 0.9rem;
+	border-radius: 6px;
+}
+
+.btn-danger {
+	background: var(--primary);
+	color: var(--text-light);
+	border: none;
+}
+
+.btn-danger:hover {
+	background: var(--primary-light);
+}
+
+/* Модальное окно */
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10000;
+}
+
+.modal[style*='display: block'],
+.modal[style*='display:block'] {
+	display: flex !important;
+}
+
+/* Стили для select/фильтра курсов */
+.form-select,
+select.form-select {
+	padding: 0.75rem 1rem;
+	padding-right: 2.5rem;
+	background: var(--glass-bg);
+	backdrop-filter: blur(15px);
+	-webkit-backdrop-filter: blur(15px);
+	border: 1px solid var(--glass-border);
+	border-radius: 8px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	min-width: 180px;
+	color: var(--text-light);
+	transition: all 0.3s ease;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.75rem center;
+	background-size: 12px;
+	background-color: var(--glass-bg);
+}
+
+.form-select:hover,
+select.form-select:hover {
+	background-color: rgba(255, 255, 255, 0.08);
+	border-color: rgba(0, 89, 255, 0.5);
+	box-shadow: 0 2px 8px rgba(0, 89, 255, 0.15);
+}
+
+.form-select:focus,
+select.form-select:focus {
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(0, 89, 255, 0.2), 0 4px 12px rgba(0, 89, 255, 0.15);
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.form-select option,
+select.form-select option {
+	background: var(--background-dark);
+	color: var(--text-light);
+	padding: 0.5rem;
+	border: none;
+}
+
+.form-select option:hover,
+select.form-select option:hover {
+	background: var(--primary);
+}
+
+.form-select option:checked,
+select.form-select option:checked {
+	background: var(--primary);
+	color: white;
+}
+
+/* Стили для фильтра в карточке управления курсами */
+.card-header .filters .form-select,
+.card-header .filters select.form-select {
+	min-width: 200px;
+	font-size: 0.9rem;
+}
+
+.modal-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(5px);
+	-webkit-backdrop-filter: blur(5px);
+}
+
+.modal-content {
+	position: relative;
+	background: var(--glass-bg);
+	border-radius: 12px;
+	width: 90%;
+	max-width: 500px;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	z-index: 1;
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5rem;
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.modal-header h3 {
+	margin: 0;
+	color: var(--text-light);
+}
+
+.modal-close {
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	cursor: pointer;
+	color: var(--text-muted);
+	padding: 0.5rem;
+	border-radius: 50%;
+	transition: background 0.2s;
+}
+
+.modal-close:hover {
+	background: var(--glass-bg);
+}
+
+.modal-body {
+	padding: 1.5rem;
+}
+
+.form-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+	margin-top: 1.5rem;
+}
+
+/* Улучшенное модальное окно для выбора сотрудника */
+.employee-selection-modal .modal-content {
+	max-width: 600px;
+	max-height: 85vh;
+}
+
+.employee-selection-modal .modal-header-info {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex: 1;
+}
+
+.employee-selection-modal .modal-header-info .modal-icon {
+	font-size: 2rem;
+	width: 48px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 89, 255, 0.2);
+	border-radius: 12px;
+}
+
+.employee-selection-modal .modal-subtitle {
+	margin: 0.25rem 0 0 0;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	font-weight: 400;
+}
+
+.employee-search-container {
+	margin-bottom: 1.5rem;
+}
+
+.employee-search-input {
+	width: 100%;
+	padding: 0.875rem 1rem;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	color: var(--text-light);
+	font-size: 0.95rem;
+	transition: all 0.3s ease;
+	outline: none;
+}
+
+.employee-search-input:focus {
+	background: rgba(255, 255, 255, 0.12);
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(0, 89, 255, 0.15);
+}
+
+.employee-search-input::placeholder {
+	color: var(--text-muted);
+}
+
+.employees-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	max-height: 400px;
+	overflow-y: auto;
+	padding-right: 0.5rem;
+}
+
+.employees-list::-webkit-scrollbar {
+	width: 6px;
+}
+
+.employees-list::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 3px;
+}
+
+.employees-list::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 3px;
+}
+
+.employees-list::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.employee-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 1rem 1.25rem;
+	background: rgba(255, 255, 255, 0.05);
+	border: 2px solid transparent;
+	border-radius: 12px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	gap: 1rem;
+}
+
+.employee-card:hover {
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(0, 89, 255, 0.3);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.employee-card.selected {
+	background: rgba(0, 89, 255, 0.15);
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(0, 89, 255, 0.2);
+}
+
+.employee-card-content {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.employee-avatar {
+	width: 48px;
+	height: 48px;
+	border-radius: 12px;
+	background: linear-gradient(135deg, var(--primary), #0066ff);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-weight: 600;
+	font-size: 1.1rem;
+	flex-shrink: 0;
+	box-shadow: 0 4px 12px rgba(0, 89, 255, 0.3);
+}
+
+.employee-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.employee-name {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-light);
+	margin-bottom: 0.25rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.employee-details {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	margin-bottom: 0.25rem;
+	flex-wrap: wrap;
+}
+
+.employee-position {
+	font-weight: 500;
+}
+
+.employee-separator {
+	color: var(--text-muted);
+	opacity: 0.5;
+}
+
+.employee-department {
+	color: var(--text-muted);
+}
+
+.employee-email {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	opacity: 0.7;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.employee-select-indicator {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.select-checkbox {
+	width: 24px;
+	height: 24px;
+	border: 2px solid var(--glass-border);
+	border-radius: 6px;
+	background: transparent;
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+.employee-card.selected .select-checkbox {
+	background: var(--primary);
+	border-color: var(--primary);
+}
+
+.employee-card.selected .select-checkbox::after {
+	content: '✓';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: white;
+	font-size: 0.875rem;
+	font-weight: bold;
+}
+
+.employees-empty {
+	text-align: center;
+	padding: 3rem 1rem;
+	color: var(--text-muted);
+}
+
+.employees-empty.hidden {
+	display: none;
+}
+
+.employee-selection-modal .modal-footer {
+	border-top: 1px solid var(--glass-border);
+	padding: 1.25rem 1.5rem;
+	margin-top: 0;
+}
+
+.employee-selection-modal .modal-footer .btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Стили для страницы ошибки 404 */
+.error-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: calc(100vh - 200px);
+	padding: 2rem;
+}
+
+.error-content {
+	text-align: center;
+	max-width: 600px;
+	width: 100%;
+}
+
+.error-code {
+	font-size: 8rem;
+	font-weight: 700;
+	background: var(--gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	line-height: 1;
+	margin-bottom: 1rem;
+	text-shadow: 0 0 40px rgba(0, 89, 255, 0.5);
+	animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.8;
+		transform: scale(1.05);
+	}
+}
+
+.error-title {
+	font-size: 2rem;
+	font-weight: 600;
+	color: var(--text-light);
+	margin-bottom: 1rem;
+}
+
+.error-message {
+	font-size: 1.1rem;
+	color: var(--text-muted);
+	margin-bottom: 2.5rem;
+	line-height: 1.6;
+}
+
+.error-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.error-actions .btn {
+	min-width: 180px;
 }

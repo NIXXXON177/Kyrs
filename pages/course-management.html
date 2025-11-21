@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Управление курсами | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<!-- Навигация-->
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<!-- Основной контент -->
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">Управление каталогом курсов</h1>
+
+					<!-- Панель действий -->
+					<section class="card actions-card">
+						<div class="card-header">
+							<h2 class="card-title">Действия с курсами</h2>
+							<button class="btn btn-primary" onclick="showAddCourseModal()">
+								➕ Добавить курс
+							</button>
+						</div>
+					</section>
+
+					<!-- Список курсов -->
+					<section class="card courses-list-card">
+						<div class="card-header">
+							<h2 class="card-title">Каталог курсов</h2>
+							<div class="filters">
+								<select id="courseFilter" class="form-select">
+									<option value="all">Все курсы</option>
+									<option value="обязательный">Обязательные</option>
+									<option value="рекомендованный">Рекомендованные</option>
+								</select>
+							</div>
+						</div>
+						<div class="courses-management-list" id="coursesList">
+							<!-- Курсы будут загружены через course-management.js -->
+						</div>
+					</section>
+				</div>
+			</main>
+
+			<!-- Модальное окно для добавления/редактирования курса -->
+			<div id="courseModal" class="modal" style="display: none">
+				<div class="modal-overlay" onclick="closeCourseModal()"></div>
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3 id="modalTitle">Добавить курс</h3>
+						<button class="modal-close" onclick="closeCourseModal()">×</button>
+					</div>
+					<div class="modal-body">
+						<form id="courseForm">
+							<div class="form-group">
+								<label for="courseTitle" class="form-label"
+									>Название курса</label
+								>
+								<input
+									type="text"
+									id="courseTitle"
+									class="form-input"
+									required
+								/>
+							</div>
+							<div class="form-group">
+								<label for="courseDescription" class="form-label"
+									>Описание</label
+								>
+								<textarea
+									id="courseDescription"
+									class="form-input"
+									rows="3"
+									required
+								></textarea>
+							</div>
+							<div class="form-group">
+								<label for="courseDuration" class="form-label"
+									>Продолжительность (часы)</label
+								>
+								<input
+									type="number"
+									id="courseDuration"
+									class="form-input"
+									min="1"
+									required
+								/>
+							</div>
+							<div class="form-group">
+								<label for="courseType" class="form-label">Тип курса</label>
+								<select id="courseType" class="form-select" required>
+									<option value="обязательный">Обязательный</option>
+									<option value="рекомендованный">Рекомендованный</option>
+								</select>
+							</div>
+							<div class="form-actions">
+								<button
+									type="button"
+									class="btn btn-outline"
+									onclick="closeCourseModal()"
+								>
+									Отмена
+								</button>
+								<button type="submit" class="btn btn-primary">Сохранить</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="../scripts/mock-db.js"></script>
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/modal.js"></script>
+		<script src="../scripts/course-management.js"></script>
+	</body>
+</html>

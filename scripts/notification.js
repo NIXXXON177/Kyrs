@@ -34,6 +34,10 @@ class NotificationManager {
 	}
 
 	checkCourseDeadlines() {
+		// HR и руководитель не проходят курсы - уведомления не нужны
+		if (typeof isHRManager !== 'undefined' && isHRManager()) return
+		if (typeof isDepartmentHead !== 'undefined' && isDepartmentHead()) return
+
 		if (!this.employeeData || !this.employeeData.courses) return
 
 		const now = new Date()
@@ -158,7 +162,11 @@ class NotificationManager {
 		if (notification.courseId) {
 			element.style.cursor = 'pointer'
 			element.addEventListener('click', () => {
-				window.location.href = `pages/course-details.html?id=${notification.courseId}`
+				const isInPagesFolder = window.location.pathname.includes('/pages/')
+				const coursePath = isInPagesFolder
+					? `course-details.html?id=${notification.courseId}`
+					: `pages/course-details.html?id=${notification.courseId}`
+				window.location.href = coursePath
 			})
 		}
 

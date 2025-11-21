@@ -46,6 +46,11 @@ class MainApp {
 		this.renderProgress()
 		this.renderActiveCourses()
 
+		// Для HR и руководителя показываем информационное сообщение
+		if (isHRManager() || isDepartmentHead()) {
+			this.renderRoleInfo()
+		}
+
 		if (typeof NotificationManager !== 'undefined') {
 			new NotificationManager(this.employeeData)
 		}
@@ -83,6 +88,67 @@ class MainApp {
 
 	async loadEmployeeData() {
 		try {
+			// Если структура данных недостаточна – дополнить из MockDB
+			if (
+				!this.employeeData ||
+				!this.employeeData.employee ||
+				!this.employeeData.employee.email
+			) {
+				// Получаем логин/email из localStorage или из токена авторизации (если нужно)
+				// Здесь предполагаем, что email – уникальный ключ
+				const userEmail =
+					(this.employeeData &&
+						this.employeeData.employee &&
+						this.employeeData.employee.email) ||
+					null
+				let userMock = null
+				if (window.MockDB && window.MockDB.Users) {
+					// Найти по email
+					userMock = window.MockDB.Users.find(u => u.email === userEmail)
+				}
+				if (userMock) {
+					// HR и руководитель не проходят курсы - только сотрудники
+					const isHR = userMock.role === window.MockDB.UserRole.HR
+					const isHead = userMock.role === window.MockDB.UserRole.HEAD
+
+					let mappedCourses = []
+					if (!isHR && !isHead) {
+						// courses и progress достаются из связей/курсов MockDB только для сотрудников
+						const courseRefs = window.MockDB.CourseUsers.filter(
+							cu => cu.userId === userMock.id
+						)
+						const allCourses = window.MockDB.Courses
+						mappedCourses = courseRefs.map(cu => {
+							const courseInfo = allCourses.find(c => c.id === cu.courseId)
+							return {
+								...courseInfo,
+								status: cu.status,
+								progress: cu.progress,
+								start_date: cu.start,
+								due_date: cu.due,
+							}
+						})
+					}
+
+					this.employeeData = {
+						employee: {
+							name: userMock.name,
+							position: userMock.position,
+							department:
+								window.MockDB.Departments.find(
+									d => d.id === userMock.departmentId
+								)?.name || '',
+							email: userMock.email,
+						},
+						courses: mappedCourses,
+						progress:
+							mappedCourses.length > 0
+								? this.calculateOverallProgress(mappedCourses)
+								: 0,
+					}
+					localStorage.setItem('userData', JSON.stringify(this.employeeData))
+				}
+			}
 			// Данные уже загружены из localStorage при авторизации
 			// Если курсов нет, добавляем mock данные
 			if (!this.employeeData.courses) {
@@ -371,6 +437,15 @@ class MainApp {
 	}
 
 	renderProgress() {
+		// HR и руководитель не проходят курсы - скрываем секцию прогресса
+		if (isHRManager() || isDepartmentHead()) {
+			const progressSection = document.querySelector('.progress-card')
+			if (progressSection) {
+				progressSection.style.display = 'none'
+			}
+			return
+		}
+
 		const progressPercent = document.getElementById('progressPercent')
 		const progressFill = document.getElementById('progressFill')
 
@@ -383,10 +458,32 @@ class MainApp {
 	}
 
 	renderActiveCourses() {
+		// HR и руководитель не проходят курсы - скрываем секцию
+		if (isHRManager() || isDepartmentHead()) {
+			const coursesSection = document.querySelector('.courses-card')
+			if (coursesSection) {
+				coursesSection.style.display = 'none'
+			}
+			return
+		}
+
 		const container = document.getElementById('activeCourses')
 		if (!container || !this.employeeData) return
 
-		const activeCourses = this.employeeData.courses.slice(0, 3)
+		// Сортируем курсы: сначала незавершенные, потом завершенные
+		const sortedCourses = [...this.employeeData.courses].sort((a, b) => {
+			const aCompleted = a.status === 'пройден'
+			const bCompleted = b.status === 'пройден'
+
+			// Если один завершен, а другой нет - незавершенный идет первым
+			if (aCompleted && !bCompleted) return 1
+			if (!aCompleted && bCompleted) return -1
+
+			// Если оба в одном статусе - сохраняем исходный порядок
+			return 0
+		})
+
+		const activeCourses = sortedCourses.slice(0, 3)
 
 		while (container.firstChild) {
 			container.removeChild(container.firstChild)
@@ -410,15 +507,27 @@ class MainApp {
 		const card = document.createElement('div')
 		card.className = 'card course-card'
 		card.addEventListener('click', () => {
-			window.location.href = `pages/course-details.html?id=${course.id}`
+			// Определяем правильный путь в зависимости от текущей страницы
+			const isInPagesFolder = window.location.pathname.includes('/pages/')
+			const coursePath = isInPagesFolder
+				? `course-details.html?id=${course.id}`
+				: `pages/course-details.html?id=${course.id}`
+			window.location.href = coursePath
 		})
+
+		// Цветовой бейдж-индикатор
+		const statusClass = this.getStatusClass(course.status)
+		const badge = document.createElement('span')
+		badge.className = `course-status-badge ${statusClass}`
+		badge.title = this.getStatusText(course.status)
+		card.appendChild(badge)
 
 		const title = document.createElement('h3')
 		title.className = 'course-title'
 		title.textContent = course.title
 
 		const status = document.createElement('div')
-		status.className = `course-status ${this.getStatusClass(course.status)}`
+		status.className = `course-status ${statusClass}`
 		status.textContent = this.getStatusText(course.status)
 
 		const meta = document.createElement('div')
@@ -492,6 +601,64 @@ class MainApp {
 	formatDate(dateString) {
 		const date = new Date(dateString)
 		return date.toLocaleDateString('ru-RU')
+	}
+
+	renderRoleInfo() {
+		// Добавляем информационную карточку для HR и руководителя
+		const container = document.querySelector('.container')
+		if (!container) return
+
+		const infoCard = document.createElement('section')
+		infoCard.className = 'card role-info-card'
+
+		if (isHRManager()) {
+			infoCard.innerHTML = `
+				<div class="card-header">
+					<h2 class="card-title">Роль: HR-менеджер</h2>
+				</div>
+				<div class="role-info-content">
+					<p>Вы управляете обучением сотрудников компании.</p>
+					<ul>
+						<li>📋 Управление каталогом курсов</li>
+						<li>👥 Назначение курсов сотрудникам</li>
+						<li>📊 Просмотр статистики и отчетов</li>
+						<li>⚙️ Контроль соблюдения сроков обучения</li>
+					</ul>
+					<p style="margin-top: 1rem; color: var(--text-muted);">
+						<strong>Примечание:</strong> HR-менеджеры не проходят курсы, а управляют процессом обучения сотрудников.
+					</p>
+				</div>
+			`
+		} else if (isDepartmentHead()) {
+			infoCard.innerHTML = `
+				<div class="card-header">
+					<h2 class="card-title">Роль: Руководитель отдела</h2>
+				</div>
+				<div class="role-info-content">
+					<p>Вы отслеживаете успеваемость сотрудников вашего отдела.</p>
+					<ul>
+						<li>📈 Просмотр статистики отдела</li>
+						<li>👥 Управление командой</li>
+						<li>📊 Анализ эффективности обучения</li>
+						<li>🎯 Контроль выполнения планов развития</li>
+					</ul>
+					<p style="margin-top: 1rem; color: var(--text-muted);">
+						<strong>Примечание:</strong> Руководители отдела не проходят курсы, а отслеживают успеваемость своих подчиненных.
+					</p>
+				</div>
+			`
+		}
+
+		// Вставляем после секции прогресса (или вместо неё, если она скрыта)
+		const progressCard = document.querySelector('.progress-card')
+		if (progressCard && progressCard.style.display !== 'none') {
+			progressCard.insertAdjacentElement('afterend', infoCard)
+		} else {
+			const employeeCard = document.querySelector('.employee-card')
+			if (employeeCard) {
+				employeeCard.insertAdjacentElement('afterend', infoCard)
+			}
+		}
 	}
 
 	showError(message) {

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Управление командой | ТехноЛайн</title>
+		<link rel="stylesheet" href="../style/style.css" />
+		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<div id="app">
+			<!-- Навигация-->
+			<nav class="navbar">
+				<div class="nav-container">
+					<div class="nav-logo">
+						<a href="../index.html"
+							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
+							<span class="logo-text">ТехноЛайн</span></a
+						>
+					</div>
+					<div class="nav-menu" id="navMenu">
+						<a href="../index.html" class="nav-link">Личный кабинет</a>
+						<a href="courses.html" class="nav-link">Мои курсы</a>
+						<a href="plan.html" class="nav-link">План обучения</a>
+						<div class="user-section">
+							<span class="user-name" id="userName"></span>
+							<button class="btn-logout" id="logoutBtn">Выйти</button>
+						</div>
+					</div>
+					<button class="nav-toggle" id="navToggle">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+				</div>
+			</nav>
+
+			<!-- Основной контент -->
+			<main class="main-content">
+				<div class="container">
+					<h1 class="page-title">Управление командой</h1>
+
+					<!-- Действия управления -->
+					<section class="card management-actions-card">
+						<div class="card-header">
+							<h2 class="card-title">Действия управления</h2>
+						</div>
+						<div class="management-grid">
+							<div class="management-item">
+								<h3>📚 Назначить обучение</h3>
+								<p>Назначить курсы сотрудникам отдела</p>
+								<button class="btn btn-primary" onclick="assignTraining()">
+									Назначить
+								</button>
+							</div>
+							<div class="management-item">
+								<h3>📊 Оценить эффективность</h3>
+								<p>Провести оценку работы команды</p>
+								<button class="btn btn-primary" onclick="evaluatePerformance()">
+									Оценить
+								</button>
+							</div>
+							<div class="management-item">
+								<h3>🎯 Поставить цели</h3>
+								<p>Определить цели развития для отдела</p>
+								<button class="btn btn-primary" onclick="setGoals()">
+									Установить
+								</button>
+							</div>
+							<div class="management-item">
+								<h3>💬 Обратная связь</h3>
+								<p>Предоставить обратную связь сотрудникам</p>
+								<button class="btn btn-primary" onclick="provideFeedback()">
+									Отправить
+								</button>
+							</div>
+						</div>
+					</section>
+
+					<!-- Текущие задачи управления -->
+					<section class="card tasks-card">
+						<div class="card-header">
+							<h2 class="card-title">Текущие управленческие задачи</h2>
+						</div>
+						<div class="tasks-list" id="managementTasks">
+							<!-- Задачи будут загружены через team-management.js -->
+						</div>
+					</section>
+
+					<!-- План развития команды -->
+					<section class="card development-card">
+						<div class="card-header">
+							<h2 class="card-title">План развития команды</h2>
+						</div>
+						<div class="development-plan" id="developmentPlan">
+							<!-- План развития будет загружен через team-management.js -->
+						</div>
+					</section>
+				</div>
+			</main>
+		</div>
+
+		<script src="../scripts/mock-db.js"></script>
+		<script src="../scripts/common.js"></script>
+		<script src="../scripts/auth.js"></script>
+		<script src="../scripts/modal.js"></script>
+		<script src="../scripts/team-management.js"></script>
+	</body>
+</html>

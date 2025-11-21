@@ -17,6 +17,7 @@ class PlanManager {
 		} else {
 			// Создаем план обучения на основе доступных курсов
 			const availableCourses = userData?.courses || []
+			const employee = userData?.employee || {}
 
 			// Фильтруем курсы, которые не пройдены
 			const upcomingCourses = availableCourses
@@ -33,13 +34,16 @@ class PlanManager {
 					category: this.getCourseCategory(course.title),
 				}))
 
+			// Генерируем персонализированные рекомендации на основе должности
+			const recommendations = this.generateRecommendations(
+				employee.position,
+				employee.department,
+				availableCourses
+			)
+
 			this.learningPlan = {
 				upcoming_courses: upcomingCourses,
-				recommendations: [
-					"Рекомендуем пройти курс 'Cloud Computing' для развития навыков работы с облачными технологиями",
-					"На основе вашей должности советуем изучить 'Контейнеризация приложений'",
-					"Для карьерного роста рекомендуем освоить 'Управление IT-проектами'",
-				],
+				recommendations: recommendations,
 				statistics: {
 					total_planned: upcomingCourses.length,
 					completion_rate: Math.round(
@@ -73,6 +77,12 @@ class PlanManager {
 			JavaScript: 'Технические навыки',
 			DevOps: 'Технические навыки',
 			Архитектура: 'Технические навыки',
+			'Управление персоналом': 'HR',
+			'Трудовое законодательство': 'HR',
+			Мотивация: 'HR',
+			'Управление IT-проектами': 'Управление',
+			Лидерство: 'Управление',
+			'Стратегическое планирование': 'Управление',
 		}
 
 		for (const [key, category] of Object.entries(categories)) {
@@ -80,6 +90,51 @@ class PlanManager {
 		}
 
 		return 'Технические навыки'
+	}
+
+	generateRecommendations(position, department, courses) {
+		const recommendations = []
+
+		switch (position.toLowerCase()) {
+			case 'hr менеджер':
+				recommendations.push(
+					"Рекомендуем пройти курс 'Управление талантами' для развития навыков работы с персоналом",
+					"На основе вашей должности советуем изучить 'Психология в HR'",
+					"Для карьерного роста рекомендуем освоить 'Стратегическое HR-планирование'"
+				)
+				break
+			case 'руководитель отдела':
+				recommendations.push(
+					"Рекомендуем пройти курс 'Управление изменениями' для развития лидерских качеств",
+					"На основе вашей должности советуем изучить 'Финансовый менеджмент для руководителей'",
+					"Для карьерного роста рекомендуем освоить 'Стратегическое планирование бизнеса'"
+				)
+				break
+			case 'инженер-программист':
+			case 'ведущий разработчик':
+				recommendations.push(
+					"Рекомендуем пройти курс 'Cloud Computing' для развития навыков работы с облачными технологиями",
+					"На основе вашей должности советуем изучить 'Контейнеризация приложений'",
+					"Для карьерного роста рекомендуем освоить 'Управление IT-проектами'"
+				)
+				break
+			default:
+				recommendations.push(
+					"Рекомендуем пройти курс 'Cloud Computing' для развития навыков работы с облачными технологиями",
+					"На основе вашей должности советуем изучить 'Контейнеризация приложений'",
+					"Для карьерного роста рекомендуем освоить 'Управление IT-проектами'"
+				)
+		}
+
+		// Добавляем рекомендации на основе незавершенных курсов
+		const inProgressCourses = courses.filter(c => c.status === 'в процессе')
+		if (inProgressCourses.length > 0) {
+			recommendations.push(
+				`Рекомендуем завершить курс "${inProgressCourses[0].title}" для улучшения ваших навыков`
+			)
+		}
+
+		return recommendations
 	}
 
 	renderPlan() {
@@ -176,11 +231,6 @@ class PlanManager {
                         <span class="meta-item">📚 ${course.category}</span>
                     </div>
                 </div>
-                <button class="btn btn-outline add-to-calendar" data-course-id="${
-									course.id
-								}">
-                    📅 Добавить в календарь
-                </button>
             </div>
         `
 	}
@@ -236,18 +286,8 @@ class PlanManager {
 	addCourseCardEventListeners() {
 		document.querySelectorAll('.course-plan-card').forEach(card => {
 			card.addEventListener('click', e => {
-				if (!e.target.classList.contains('add-to-calendar')) {
-					const courseId = card.dataset.courseId
-					this.viewCourseDetails(courseId)
-				}
-			})
-		})
-
-		document.querySelectorAll('.add-to-calendar').forEach(btn => {
-			btn.addEventListener('click', e => {
-				e.stopPropagation()
-				const courseId = btn.dataset.courseId
-				this.addToCalendar(courseId)
+				const courseId = card.dataset.courseId
+				this.viewCourseDetails(courseId)
 			})
 		})
 	}
@@ -267,26 +307,6 @@ class PlanManager {
 				await modal.show(message, 'info', 'Детали курса')
 			} else if (typeof NotificationManager !== 'undefined') {
 				NotificationManager.showTempNotification(message, 'info')
-			}
-		}
-	}
-
-	async addToCalendar(courseId) {
-		const course = this.learningPlan.upcoming_courses.find(
-			c => c.id == courseId
-		)
-		if (course) {
-			if (typeof NotificationManager !== 'undefined') {
-				NotificationManager.showTempNotification(
-					`Курс "${course.title}" добавлен в календарь`,
-					'info'
-				)
-			} else if (typeof modal !== 'undefined') {
-				await modal.show(
-					`Курс "${course.title}" добавлен в календарь`,
-					'success',
-					'Успешно'
-				)
 			}
 		}
 	}
