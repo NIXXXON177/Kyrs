@@ -256,81 +256,410 @@ class TeamManagement {
 	}
 }
 
-// Глобальные функции для кнопок
-async function assignTraining() {
-	const courseName =
-		typeof modal !== 'undefined'
-			? await modal.prompt(
-					'Введите название курса для назначения:',
-					'Назначение обучения',
-					'Название курса'
-			  )
-			: prompt('Введите название курса для назначения:')
+// Функция выбора сотрудника из отдела руководителя
+async function selectEmployeeFromDepartment(title, subtitle = '') {
+	if (!window.MockDB || !window.MockDB.Users) {
+		if (typeof modal !== 'undefined') {
+			modal.show('Ошибка загрузки сотрудников', 'error', 'Ошибка')
+		} else {
+			alert('Ошибка загрузки сотрудников')
+		}
+		return null
+	}
 
-	if (!courseName) return
+	// Получаем текущего пользователя (руководителя)
+	const userData = AuthManager.getUserData()
+	if (!userData || !userData.employee) {
+		return null
+	}
 
-	const employeeName =
-		typeof modal !== 'undefined'
-			? await modal.prompt(
-					'Введите имя сотрудника:',
-					'Назначение обучения',
-					'Имя сотрудника'
-			  )
-			: prompt('Введите имя сотрудника:')
+	// Получаем ID отдела руководителя
+	const currentUser = window.MockDB.Users.find(
+		u => u.email === userData.employee.email
+	)
+	if (!currentUser) {
+		return null
+	}
 
-	if (courseName && employeeName) {
-		if (typeof NotificationManager !== 'undefined') {
-			NotificationManager.showTempNotification(
-				`Курс "${courseName}" назначен сотруднику ${employeeName}`,
-				'success'
-			)
-		} else if (typeof modal !== 'undefined') {
+	// Фильтруем сотрудников того же отдела (только обычных сотрудников, не HR и не руководителей)
+	const departmentEmployees = window.MockDB.Users.filter(
+		user =>
+			user.departmentId === currentUser.departmentId &&
+			user.role === window.MockDB.UserRole.EMPLOYEE
+	).map(employee => {
+		const department = window.MockDB.Departments.find(
+			d => d.id === employee.departmentId
+		)
+		return {
+			id: employee.id,
+			name: employee.name,
+			position: employee.position,
+			department: department ? department.name : 'Не указан',
+			email: employee.email,
+		}
+	})
+
+	if (departmentEmployees.length === 0) {
+		if (typeof modal !== 'undefined') {
 			modal.show(
-				`Курс "${courseName}" назначен сотруднику ${employeeName}`,
-				'success',
-				'Успешно'
+				'В вашем отделе нет сотрудников для выбора',
+				'info',
+				'Информация'
 			)
 		} else {
-			alert(`Курс "${courseName}" назначен сотруднику ${employeeName}`)
+			alert('В вашем отделе нет сотрудников для выбора')
+		}
+		return null
+	}
+
+	// Используем функцию выбора сотрудника из course-management.js
+	return await showEmployeeSelectionModalForTeam(
+		title,
+		subtitle,
+		departmentEmployees
+	)
+}
+
+// Модальное окно для выбора сотрудника (адаптированная версия)
+function showEmployeeSelectionModalForTeam(title, subtitle, employees) {
+	return new Promise(resolve => {
+		const modal = document.createElement('div')
+		modal.className = 'modal employee-selection-modal'
+		modal.innerHTML = `
+			<div class="modal-overlay"></div>
+			<div class="modal-content employee-selection-content">
+				<div class="modal-header">
+					<div class="modal-header-info">
+						<div class="modal-icon success">👥</div>
+						<div>
+							<h3>${title}</h3>
+							${subtitle ? `<p class="modal-subtitle">${subtitle}</p>` : ''}
+						</div>
+					</div>
+					<button class="modal-close" aria-label="Закрыть">×</button>
+				</div>
+				<div class="modal-body">
+					<div class="employee-search-container">
+						<input
+							type="text"
+							id="employeeSearchInput"
+							class="employee-search-input"
+							placeholder="🔍 Поиск сотрудника по имени, должности или отделу..."
+						/>
+					</div>
+					<div class="employees-list" id="employeesList">
+						${employees
+							.map(
+								employee => `
+							<div class="employee-card" data-employee-id="${employee.id}">
+								<div class="employee-card-content">
+									<div class="employee-avatar">${employee.name
+										.split(' ')
+										.map(n => n[0])
+										.join('')
+										.toUpperCase()}</div>
+									<div class="employee-info">
+										<div class="employee-name">${employee.name}</div>
+										<div class="employee-details">
+											<span class="employee-position">${employee.position}</span>
+											<span class="employee-separator">•</span>
+											<span class="employee-department">${employee.department}</span>
+										</div>
+										<div class="employee-email">${employee.email}</div>
+									</div>
+								</div>
+								<div class="employee-select-indicator">
+									<div class="select-checkbox"></div>
+								</div>
+							</div>
+						`
+							)
+							.join('')}
+					</div>
+					<div class="employees-empty hidden" id="employeesEmpty">
+						<p>Сотрудники не найдены</p>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary modal-btn-cancel">Отмена</button>
+					<button class="btn btn-primary modal-btn-confirm" disabled>
+						Выбрать
+					</button>
+				</div>
+			</div>
+		`
+
+		const modalContainer =
+			document.getElementById('modalContainer') || document.body
+		let container = document.getElementById('modalContainer')
+		if (!container) {
+			container = document.createElement('div')
+			container.id = 'modalContainer'
+			document.body.appendChild(container)
+		}
+		container.appendChild(modal)
+
+		let selectedEmployeeId = null
+		const employeesList = modal.querySelector('#employeesList')
+		const employeeCards = modal.querySelectorAll('.employee-card')
+		const searchInput = modal.querySelector('#employeeSearchInput')
+		const confirmBtn = modal.querySelector('.modal-btn-confirm')
+		const emptyMessage = modal.querySelector('#employeesEmpty')
+
+		// Обработчик выбора сотрудника
+		employeeCards.forEach(card => {
+			card.addEventListener('click', () => {
+				if (card.style.display !== 'none') {
+					employeeCards.forEach(c => {
+						if (c.style.display !== 'none') {
+							c.classList.remove('selected')
+						}
+					})
+					card.classList.add('selected')
+					selectedEmployeeId = parseInt(card.dataset.employeeId)
+					confirmBtn.disabled = false
+				}
+			})
+
+			card.addEventListener('dblclick', () => {
+				if (card.style.display !== 'none') {
+					card.classList.add('selected')
+					selectedEmployeeId = parseInt(card.dataset.employeeId)
+					confirmBtn.disabled = false
+					confirmBtn.click()
+				}
+			})
+		})
+
+		// Поиск сотрудников
+		searchInput.addEventListener('input', e => {
+			const searchTerm = e.target.value.toLowerCase().trim()
+			let visibleCount = 0
+
+			employeeCards.forEach(card => {
+				const employeeName = card
+					.querySelector('.employee-name')
+					.textContent.toLowerCase()
+				const employeePosition = card
+					.querySelector('.employee-position')
+					.textContent.toLowerCase()
+				const employeeDepartment = card
+					.querySelector('.employee-department')
+					.textContent.toLowerCase()
+				const employeeEmail = card
+					.querySelector('.employee-email')
+					.textContent.toLowerCase()
+
+				const matches =
+					employeeName.includes(searchTerm) ||
+					employeePosition.includes(searchTerm) ||
+					employeeDepartment.includes(searchTerm) ||
+					employeeEmail.includes(searchTerm)
+
+				if (matches) {
+					card.style.display = 'flex'
+					visibleCount++
+				} else {
+					card.style.display = 'none'
+					card.classList.remove('selected')
+				}
+			})
+
+			if (visibleCount === 0) {
+				emptyMessage.classList.remove('hidden')
+				employeesList.style.display = 'none'
+			} else {
+				emptyMessage.classList.add('hidden')
+				employeesList.style.display = 'block'
+			}
+
+			if (searchTerm && selectedEmployeeId) {
+				const selectedCard = modal.querySelector(
+					`.employee-card[data-employee-id="${selectedEmployeeId}"]`
+				)
+				if (selectedCard && selectedCard.style.display === 'none') {
+					selectedCard.classList.remove('selected')
+					selectedEmployeeId = null
+					confirmBtn.disabled = true
+				}
+			}
+		})
+
+		// Устанавливаем display: flex для модального окна
+		modal.style.display = 'flex'
+
+		setTimeout(() => {
+			modal.classList.add('active')
+			searchInput.focus()
+		}, 10)
+
+		const closeModal = result => {
+			modal.classList.remove('active')
+			setTimeout(() => {
+				modal.remove()
+				resolve(result)
+			}, 300)
+		}
+
+		confirmBtn.addEventListener('click', () => {
+			if (selectedEmployeeId) {
+				closeModal(selectedEmployeeId)
+			}
+		})
+
+		modal.querySelector('.modal-btn-cancel').addEventListener('click', () => {
+			closeModal(null)
+		})
+
+		modal.querySelector('.modal-overlay').addEventListener('click', () => {
+			closeModal(null)
+		})
+
+		modal.querySelector('.modal-close').addEventListener('click', () => {
+			closeModal(null)
+		})
+
+		const handleEscape = e => {
+			if (e.key === 'Escape') {
+				closeModal(null)
+				document.removeEventListener('keydown', handleEscape)
+			}
+		}
+		document.addEventListener('keydown', handleEscape)
+	})
+}
+
+// Глобальные функции для кнопок
+async function assignTraining() {
+	// Сначала выбираем курс
+	if (!window.MockDB || !window.MockDB.Courses) {
+		if (typeof modal !== 'undefined') {
+			modal.show('Ошибка загрузки курсов', 'error', 'Ошибка')
+		} else {
+			alert('Ошибка загрузки курсов')
+		}
+		return
+	}
+
+	const courses = window.MockDB.Courses.map(course => ({
+		id: course.id,
+		label: `${course.title} (${course.type})`,
+	}))
+
+	const selectedCourseId =
+		typeof modal !== 'undefined'
+			? await modal.select(
+					'Выберите курс для назначения:',
+					courses,
+					'Выбор курса'
+			  )
+			: null
+
+	if (!selectedCourseId) return
+
+	const selectedCourse = window.MockDB.Courses.find(
+		c => c.id == selectedCourseId
+	)
+	if (!selectedCourse) return
+
+	// Затем выбираем сотрудника
+	const selectedEmployeeId = await selectEmployeeFromDepartment(
+		'Назначение обучения',
+		`Курс: ${selectedCourse.title}`
+	)
+
+	if (selectedEmployeeId) {
+		const selectedEmployee = window.MockDB.Users.find(
+			e => e.id == selectedEmployeeId
+		)
+		if (selectedEmployee) {
+			// Сохраняем назначение курса в MockDB
+			if (window.MockDB && window.MockDB.CourseUsers) {
+				const existingAssignment = window.MockDB.CourseUsers.find(
+					cu =>
+						cu.userId === selectedEmployeeId && cu.courseId === selectedCourseId
+				)
+
+				if (!existingAssignment) {
+					window.MockDB.CourseUsers.push({
+						userId: selectedEmployeeId,
+						courseId: selectedCourseId,
+						status: 'назначен',
+						progress: 0,
+						start: new Date().toISOString().split('T')[0],
+						due: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+							.toISOString()
+							.split('T')[0],
+					})
+				}
+			}
+
+			if (typeof NotificationManager !== 'undefined') {
+				NotificationManager.showTempNotification(
+					`Курс "${selectedCourse.title}" назначен сотруднику ${selectedEmployee.name}`,
+					'success'
+				)
+			} else if (typeof modal !== 'undefined') {
+				modal.show(
+					`Курс "${selectedCourse.title}" назначен сотруднику ${selectedEmployee.name}`,
+					'success',
+					'Успешно'
+				)
+			} else {
+				alert(
+					`Курс "${selectedCourse.title}" назначен сотруднику ${selectedEmployee.name}`
+				)
+			}
 		}
 	}
 }
 
 async function evaluatePerformance() {
-	const employeeName =
-		typeof modal !== 'undefined'
-			? await modal.prompt(
-					'Введите имя сотрудника для оценки:',
-					'Оценка эффективности',
-					'Имя сотрудника'
-			  )
-			: prompt('Введите имя сотрудника для оценки:')
+	// Выбираем сотрудника
+	const selectedEmployeeId = await selectEmployeeFromDepartment(
+		'Оценка эффективности',
+		'Выберите сотрудника для оценки'
+	)
 
-	if (!employeeName) return
+	if (!selectedEmployeeId) return
+
+	const selectedEmployee = window.MockDB.Users.find(
+		e => e.id == selectedEmployeeId
+	)
+	if (!selectedEmployee) return
+
+	// Выбираем оценку
+	const ratingOptions = [
+		{ id: '5', label: '5 - Отлично' },
+		{ id: '4', label: '4 - Хорошо' },
+		{ id: '3', label: '3 - Удовлетворительно' },
+		{ id: '2', label: '2 - Неудовлетворительно' },
+		{ id: '1', label: '1 - Плохо' },
+	]
 
 	const rating =
 		typeof modal !== 'undefined'
-			? await modal.prompt(
-					'Оценка (1-5):',
-					'Оценка эффективности',
-					'Оценка от 1 до 5'
+			? await modal.select(
+					`Оцените эффективность работы сотрудника ${selectedEmployee.name}:`,
+					ratingOptions,
+					'Оценка эффективности'
 			  )
-			: prompt('Оценка (1-5):')
+			: null
 
-	if (employeeName && rating) {
+	if (rating && selectedEmployee) {
 		if (typeof NotificationManager !== 'undefined') {
 			NotificationManager.showTempNotification(
-				`Оценка ${rating}/5 сохранена для ${employeeName}`,
+				`Оценка ${rating}/5 сохранена для ${selectedEmployee.name}`,
 				'success'
 			)
 		} else if (typeof modal !== 'undefined') {
 			modal.show(
-				`Оценка ${rating}/5 сохранена для ${employeeName}`,
+				`Оценка ${rating}/5 сохранена для ${selectedEmployee.name}`,
 				'success',
 				'Успешно'
 			)
 		} else {
-			alert(`Оценка ${rating}/5 сохранена для ${employeeName}`)
+			alert(`Оценка ${rating}/5 сохранена для ${selectedEmployee.name}`)
 		}
 	}
 }
@@ -360,41 +689,86 @@ async function setGoals() {
 }
 
 async function provideFeedback() {
-	const employeeName =
-		typeof modal !== 'undefined'
-			? await modal.prompt(
-					'Введите имя сотрудника:',
-					'Обратная связь',
-					'Имя сотрудника'
-			  )
-			: prompt('Введите имя сотрудника:')
+	// Выбираем сотрудника
+	const selectedEmployeeId = await selectEmployeeFromDepartment(
+		'Обратная связь',
+		'Выберите сотрудника для предоставления обратной связи'
+	)
 
-	if (!employeeName) return
+	if (!selectedEmployeeId) return
 
+	const selectedEmployee = window.MockDB.Users.find(
+		e => e.id == selectedEmployeeId
+	)
+	if (!selectedEmployee) return
+
+	// Получаем информацию о текущем руководителе
+	const userData = AuthManager.getUserData()
+	if (!userData || !userData.employee) return
+
+	const managerName = userData.employee.name
+
+	// Вводим текст обратной связи
 	const feedback =
 		typeof modal !== 'undefined'
 			? await modal.prompt(
-					'Введите обратную связь:',
+					`Введите обратную связь для ${selectedEmployee.name}:`,
 					'Обратная связь',
 					'Текст обратной связи'
 			  )
-			: prompt('Введите обратную связь:')
+			: prompt(`Введите обратную связь для ${selectedEmployee.name}:`)
 
-	if (employeeName && feedback) {
+	if (feedback && selectedEmployee) {
+		// Сохраняем обратную связь в localStorage
+		saveFeedbackToEmployee(selectedEmployeeId, feedback, managerName)
+
 		if (typeof NotificationManager !== 'undefined') {
 			NotificationManager.showTempNotification(
-				`Обратная связь отправлена ${employeeName}`,
+				`Обратная связь отправлена ${selectedEmployee.name}`,
 				'success'
 			)
 		} else if (typeof modal !== 'undefined') {
 			modal.show(
-				`Обратная связь отправлена ${employeeName}`,
+				`Обратная связь отправлена ${selectedEmployee.name}`,
 				'success',
 				'Успешно'
 			)
 		} else {
-			alert(`Обратная связь отправлена ${employeeName}`)
+			alert(`Обратная связь отправлена ${selectedEmployee.name}`)
 		}
+	}
+}
+
+// Функция сохранения обратной связи для сотрудника
+function saveFeedbackToEmployee(employeeId, feedbackText, managerName) {
+	try {
+		// Получаем существующие обратные связи из localStorage
+		let allFeedbacks = {}
+		const storedFeedbacks = localStorage.getItem('employeeFeedbacks')
+		if (storedFeedbacks) {
+			allFeedbacks = JSON.parse(storedFeedbacks)
+		}
+
+		// Инициализируем массив обратных связей для сотрудника, если его нет
+		if (!allFeedbacks[employeeId]) {
+			allFeedbacks[employeeId] = []
+		}
+
+		// Добавляем новую обратную связь
+		const newFeedback = {
+			id: Date.now(),
+			text: feedbackText,
+			from: managerName,
+			date: new Date().toISOString(),
+			read: false,
+		}
+
+		allFeedbacks[employeeId].unshift(newFeedback) // Добавляем в начало массива
+
+		// Сохраняем обратно в localStorage
+		localStorage.setItem('employeeFeedbacks', JSON.stringify(allFeedbacks))
+	} catch (error) {
+		console.error('Ошибка сохранения обратной связи:', error)
 	}
 }
 

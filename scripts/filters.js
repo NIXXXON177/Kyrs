@@ -6,6 +6,8 @@ class FilterManager {
 			status: 'all',
 			search: '',
 		}
+		this.currentPage = 1
+		this.pageSize = 6
 		this.init()
 	}
 
@@ -102,6 +104,7 @@ class FilterManager {
 			return true
 		})
 
+		this.currentPage = 1 // сброс на первую страницу при фильтрации
 		this.renderCourses()
 		this.updateResultsCount()
 	}
@@ -127,20 +130,24 @@ class FilterManager {
 			emptyCard.appendChild(title)
 			emptyCard.appendChild(message)
 			container.appendChild(emptyCard)
+			this.renderPagination() // отрисуем даже при отсутствии (скроется)
 			return
 		}
 
-		this.filteredCourses.forEach(course => {
+		const startIdx = (this.currentPage - 1) * this.pageSize
+		const endIdx = startIdx + this.pageSize
+		this.filteredCourses.slice(startIdx, endIdx).forEach(course => {
 			const courseCard = this.createCourseCard(course)
 			container.appendChild(courseCard)
 		})
+		this.renderPagination()
 	}
 
 	createCourseCard(course) {
 		const card = document.createElement('div')
 		card.className = 'card course-card'
 		card.addEventListener('click', () => {
-			window.location.href = `course-details.html?id=${course.id}`
+			this.showCourseModal(course)
 		})
 
 		const title = document.createElement('h3')
@@ -193,6 +200,135 @@ class FilterManager {
 		card.appendChild(meta)
 
 		return card
+	}
+
+	showCourseModal(course) {
+		// Create modal content
+		const modalContent = `
+			<div class="course-modal-header">
+				<h2 class="course-modal-title">${course.title}</h2>
+				<div class="course-modal-status ${this.getStatusClass(course.status)}">
+					${this.getStatusText(course.status)}
+				</div>
+			</div>
+			<div class="course-modal-body">
+				<div class="course-modal-info">
+					<div class="info-grid">
+						<div class="info-item">
+							<h4>Дата начала</h4>
+							<p>${this.formatDate(course.start_date)}</p>
+						</div>
+						<div class="info-item">
+							<h4>Срок окончания</h4>
+							<p>${this.formatDate(course.due_date)}</p>
+						</div>
+						<div class="info-item">
+							<h4>Прогресс</h4>
+							<p>${course.progress}%</p>
+						</div>
+						<div class="info-item">
+							<h4>Статус сертификата</h4>
+							<p>${
+								course.status === 'пройден'
+									? 'Сертификат получен'
+									: course.status === 'в процессе'
+									? 'Сертификат будет доступен после завершения'
+									: 'Сертификат не доступен'
+							}</p>
+						</div>
+					</div>
+					<div class="course-description">
+						<h4>Описание курса</h4>
+						<p>${course.description || 'Описание курса отсутствует.'}</p>
+					</div>
+				</div>
+			</div>
+			<div class="course-modal-actions">
+				<button class="btn btn-secondary close-modal-btn">Закрыть</button>
+				<button class="btn btn-primary start-course-btn" data-course-id="${course.id}">
+					${
+						course.status === 'пройден'
+							? 'Повторить курс'
+							: course.status === 'в процессе'
+							? 'Продолжить обучение'
+							: 'Начать обучение'
+					}
+				</button>
+			</div>
+		`
+
+		// Use the modal system
+		if (typeof modal !== 'undefined') {
+			// Create a custom modal
+			const customModal = document.createElement('div')
+			customModal.className = 'modal course-details-modal'
+			customModal.innerHTML = `
+				<div class="modal-overlay"></div>
+				<div class="modal-content course-modal-content">
+					<button class="modal-close">×</button>
+					${modalContent}
+				</div>
+			`
+
+			// Get or create modal container
+			let modalContainer = document.getElementById('modalContainer')
+			if (!modalContainer) {
+				modalContainer = document.createElement('div')
+				modalContainer.id = 'modalContainer'
+				document.body.appendChild(modalContainer)
+			}
+
+			modalContainer.appendChild(customModal)
+
+			// Add event listeners
+			const modalContent = customModal.querySelector('.modal-content')
+			const closeBtn = customModal.querySelector('.modal-close')
+			const closeModalBtn = customModal.querySelector('.close-modal-btn')
+			const startCourseBtn = customModal.querySelector('.start-course-btn')
+
+			// Close modal when clicking outside content
+			customModal.addEventListener('click', e => {
+				if (e.target === customModal) {
+					closeCourseModal()
+				}
+			})
+
+			if (closeBtn) {
+				closeBtn.addEventListener('click', closeCourseModal)
+			}
+			if (closeModalBtn) {
+				closeModalBtn.addEventListener('click', closeCourseModal)
+			}
+			if (startCourseBtn) {
+				startCourseBtn.addEventListener('click', () => {
+					const courseId = parseInt(startCourseBtn.dataset.courseId)
+					startCourse(courseId)
+				})
+			}
+
+			// Close on Escape key
+			window.currentEscapeHandler = e => {
+				if (e.key === 'Escape') {
+					closeCourseModal()
+				}
+			}
+			document.addEventListener('keydown', window.currentEscapeHandler)
+
+			// Show modal with animation
+			setTimeout(() => {
+				customModal.classList.add('active')
+			}, 10)
+
+			// Store reference for closing
+			window.currentCourseModal = customModal
+		} else {
+			// Fallback to alert
+			alert(
+				`Курс: ${course.title}\nСтатус: ${this.getStatusText(
+					course.status
+				)}\nОписание: ${course.description}`
+			)
+		}
 	}
 
 	updateResultsCount() {
@@ -274,7 +410,6 @@ class FilterManager {
 		}
 
 		const userData = JSON.parse(localStorage.getItem('userData'))
-		console.log('Данные пользователя для сертификатов:', userData)
 
 		if (!userData || !userData.courses) {
 			if (typeof modal !== 'undefined') {
@@ -289,8 +424,6 @@ class FilterManager {
 		const completedCourses = userData.courses.filter(
 			course => course.status === 'пройден'
 		)
-
-		console.log('Найденные пройденные курсы:', completedCourses)
 
 		if (completedCourses.length === 0) {
 			if (typeof modal !== 'undefined') {
@@ -688,6 +821,91 @@ class FilterManager {
 		if (months >= 2 && months <= 4) return 'месяца'
 		return 'месяцев'
 	}
+
+	renderPagination() {
+		// Удаляем существующую пагинацию
+		let paginator = document.getElementById('coursesPaginator')
+		if (paginator) paginator.remove()
+
+		const pageCount = Math.ceil(this.filteredCourses.length / this.pageSize)
+		if (pageCount <= 1) return // не рендерим
+
+		// Создаем контейнер для пагинации (можно указать конкретный существующий элемент)
+		const paginationContainer =
+			document.getElementById('paginationContainer') || document.body
+
+		paginator = document.createElement('div')
+		paginator.id = 'coursesPaginator'
+		paginator.className = 'pagination'
+
+		// Кнопка prev
+		const prev = document.createElement('button')
+		prev.textContent = '<'
+		prev.className = 'pagination-btn'
+		prev.disabled = this.currentPage === 1
+		prev.onclick = () => {
+			this.currentPage--
+			this.renderCourses()
+		}
+		paginator.appendChild(prev)
+
+		// Кнопки страниц (макс 5)
+		let first = Math.max(1, this.currentPage - 2)
+		let last = Math.min(pageCount, first + 4)
+		if (last - first < 4) first = Math.max(1, last - 4)
+
+		for (let p = first; p <= last; p++) {
+			const btn = document.createElement('button')
+			btn.textContent = p
+			btn.className =
+				'pagination-btn' + (p === this.currentPage ? ' active' : '')
+			btn.onclick = () => {
+				this.currentPage = p
+				this.renderCourses()
+			}
+			paginator.appendChild(btn)
+		}
+
+		// Кнопка next
+		const next = document.createElement('button')
+		next.textContent = '>'
+		next.className = 'pagination-btn'
+		next.disabled = this.currentPage === pageCount
+		next.onclick = () => {
+			this.currentPage++
+			this.renderCourses()
+		}
+		paginator.appendChild(next)
+
+		// Добавляем пагинацию в отдельный контейнер
+		paginationContainer.appendChild(paginator)
+	}
+}
+
+// Global functions for course modal
+function closeCourseModal() {
+	if (window.currentCourseModal) {
+		window.currentCourseModal.classList.remove('active')
+		setTimeout(() => {
+			if (window.currentCourseModal && window.currentCourseModal.parentNode) {
+				window.currentCourseModal.parentNode.removeChild(
+					window.currentCourseModal
+				)
+			}
+			window.currentCourseModal = null
+		}, 300)
+	}
+	// Убираем обработчик клавиатуры, если он был добавлен
+	if (window.currentEscapeHandler) {
+		document.removeEventListener('keydown', window.currentEscapeHandler)
+		window.currentEscapeHandler = null
+	}
+}
+
+function startCourse(courseId) {
+	closeCourseModal()
+	// Redirect to course details with study mode
+	window.location.href = `course-details.html?id=${courseId}&mode=study`
 }
 
 if (window.location.pathname.includes('courses.html')) {
@@ -736,7 +954,6 @@ if (window.location.pathname.includes('courses.html')) {
 
 						// Предотвращаем повторный вызов
 						if (isPrinting) {
-							console.log('Печать уже выполняется, пропускаем повторный вызов')
 							return
 						}
 

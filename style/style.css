@@ -1832,3 +1832,101 @@ select.form-select option:checked {
 .error-actions .btn {
 	min-width: 180px;
 }
+
+/* Стили для модального окна деталей курса */
+.course-details-modal .modal-content {
+	max-width: 600px;
+	max-height: 90vh;
+}
+
+.course-modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.5rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.course-modal-title {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: var(--text-light);
+}
+
+.course-modal-status {
+	padding: 0.5rem 1rem;
+	border-radius: 20px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.course-modal-status.status-completed {
+	background: rgba(76, 175, 80, 0.2);
+	color: #4caf50;
+}
+
+.course-modal-status.status-in-progress {
+	background: rgba(255, 152, 0, 0.2);
+	color: #ff9800;
+}
+
+.course-modal-status.status-upcoming {
+	background: rgba(33, 150, 243, 0.2);
+	color: #2196f3;
+}
+
+.course-modal-status.status-expired {
+	background: rgba(244, 67, 54, 0.2);
+	color: #f44336;
+}
+
+.course-modal-body {
+	margin-bottom: 2rem;
+}
+
+.course-modal-info .info-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.course-modal-info .info-item h4 {
+	margin: 0 0 0.5rem 0;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.course-modal-info .info-item p {
+	margin: 0;
+	font-size: 1rem;
+	color: var(--text-light);
+	font-weight: 500;
+}
+
+.course-description h4 {
+	margin: 0 0 0.5rem 0;
+	font-size: 1rem;
+	color: var(--text-light);
+	font-weight: 600;
+}
+
+.course-description p {
+	margin: 0;
+	color: var(--text-muted);
+	line-height: 1.6;
+}
+
+.course-modal-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--glass-border);
+}

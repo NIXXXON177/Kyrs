@@ -566,6 +566,9 @@ function createPlayerProgressSection() {
 		? currentCourse.modules.filter(m => m && m.completed).length
 		: 0
 	const totalModules = currentCourse.modules ? currentCourse.modules.length : 0
+	const allModulesCompleted =
+		completedModules === totalModules && totalModules > 0
+	const isCourseCompleted = currentCourse.status === 'пройден'
 
 	const progressText = document.createElement('div')
 	progressText.style.cssText =
@@ -584,6 +587,26 @@ function createPlayerProgressSection() {
 	progressBar.appendChild(progressFill)
 	section.appendChild(progressText)
 	section.appendChild(progressBar)
+
+	// Добавляем кнопку "Завершить курс", если все модули пройдены, но курс еще не завершен
+	if (allModulesCompleted && !isCourseCompleted) {
+		const completeCourseBtn = document.createElement('button')
+		completeCourseBtn.className = 'btn btn-primary'
+		completeCourseBtn.style.width = '100%'
+		completeCourseBtn.style.marginTop = '1rem'
+		completeCourseBtn.textContent = '✅ Завершить курс'
+		completeCourseBtn.addEventListener('click', completeCourse)
+		section.appendChild(completeCourseBtn)
+	}
+
+	// Показываем статус, если курс завершен
+	if (isCourseCompleted) {
+		const completedBadge = document.createElement('div')
+		completedBadge.style.cssText =
+			'padding: 0.75rem; background: rgba(76, 175, 80, 0.2); border: 1px solid rgba(76, 175, 80, 0.5); border-radius: 8px; text-align: center; color: #4caf50; font-weight: 500; margin-top: 1rem;'
+		completedBadge.textContent = '✅ Курс завершен'
+		section.appendChild(completedBadge)
+	}
 
 	return section
 }
@@ -717,37 +740,25 @@ function completePlayerModule(moduleIndex) {
 	const userData = JSON.parse(localStorage.getItem('userData'))
 	const courseIndex = userData.courses.findIndex(c => c.id === currentCourse.id)
 
-	if (isCourseCompleted) {
-		// Меняем статус курса на "пройден" и устанавливаем прогресс 100%
-		userData.courses[courseIndex].status = 'пройден'
-		userData.courses[courseIndex].progress = 100
-		currentCourse.status = 'пройден'
-		currentCourse.progress = 100
+	// Обновляем прогресс курса
+	const progressPercent = Math.round((completedModules / totalModules) * 100)
+	userData.courses[courseIndex].progress = progressPercent
+	currentCourse.progress = progressPercent
 
-		// Пересчитываем общий прогресс пользователя
-		const totalCourses = userData.courses.length
-		const completedCourses = userData.courses.filter(
-			c => c.status === 'пройден'
-		).length
-		userData.progress = Math.round((completedCourses / totalCourses) * 100)
-	} else {
-		// Обновляем прогресс курса
-		const progressPercent = Math.round((completedModules / totalModules) * 100)
-		userData.courses[courseIndex].progress = progressPercent
-		currentCourse.progress = progressPercent
-
-		// Меняем статус на "в процессе", если еще не
-		if (userData.courses[courseIndex].status !== 'в процессе') {
-			userData.courses[courseIndex].status = 'в процессе'
-			currentCourse.status = 'в процессе'
-		}
+	// Меняем статус на "в процессе", если еще не завершен
+	if (
+		userData.courses[courseIndex].status !== 'пройден' &&
+		userData.courses[courseIndex].status !== 'в процессе'
+	) {
+		userData.courses[courseIndex].status = 'в процессе'
+		currentCourse.status = 'в процессе'
 	}
 
 	localStorage.setItem('userData', JSON.stringify(userData))
 
 	// Показываем уведомление
 	const message = isCourseCompleted
-		? 'Поздравляем! Курс успешно пройден!'
+		? 'Все модули пройдены! Нажмите кнопку "Завершить курс" для завершения.'
 		: 'Модуль успешно пройден!'
 
 	if (typeof NotificationManager !== 'undefined') {
@@ -757,6 +768,93 @@ function completePlayerModule(moduleIndex) {
 	// Перезагружаем плеер
 	const container = document.getElementById('courseDetails')
 	renderCoursePlayer(container)
+}
+
+function completeCourse() {
+	if (!currentCourse) return
+
+	// Проверяем, что все модули пройдены
+	const totalModules = currentCourse.modules ? currentCourse.modules.length : 0
+	const completedModules = currentCourse.modules
+		? currentCourse.modules.filter(m => m && m.completed).length
+		: 0
+
+	if (completedModules !== totalModules || totalModules === 0) {
+		if (typeof modal !== 'undefined') {
+			modal.show(
+				'Для завершения курса необходимо пройти все модули',
+				'warning',
+				'Внимание'
+			)
+		} else {
+			alert('Для завершения курса необходимо пройти все модули')
+		}
+		return
+	}
+
+	// Подтверждение завершения курса
+	if (typeof modal !== 'undefined') {
+		modal
+			.confirm(
+				`Вы уверены, что хотите завершить курс "${currentCourse.title}"?`,
+				'Завершение курса'
+			)
+			.then(confirmed => {
+				if (confirmed) {
+					finishCourse()
+				}
+			})
+	} else {
+		if (
+			confirm(`Вы уверены, что хотите завершить курс "${currentCourse.title}"?`)
+		) {
+			finishCourse()
+		}
+	}
+}
+
+function finishCourse() {
+	// Обновляем данные в localStorage
+	const userData = JSON.parse(localStorage.getItem('userData'))
+	const courseIndex = userData.courses.findIndex(c => c.id === currentCourse.id)
+
+	if (courseIndex === -1) return
+
+	// Меняем статус курса на "пройден" и устанавливаем прогресс 100%
+	userData.courses[courseIndex].status = 'пройден'
+	userData.courses[courseIndex].progress = 100
+	currentCourse.status = 'пройден'
+	currentCourse.progress = 100
+
+	// Пересчитываем общий прогресс пользователя
+	const totalCourses = userData.courses.length
+	const completedCourses = userData.courses.filter(
+		c => c.status === 'пройден'
+	).length
+	userData.progress = Math.round((completedCourses / totalCourses) * 100)
+
+	localStorage.setItem('userData', JSON.stringify(userData))
+
+	// Показываем уведомление
+	if (typeof NotificationManager !== 'undefined') {
+		NotificationManager.showTempNotification(
+			`Поздравляем! Курс "${currentCourse.title}" успешно завершен!`,
+			'success'
+		)
+	} else if (typeof modal !== 'undefined') {
+		modal.show(
+			`Поздравляем! Курс "${currentCourse.title}" успешно завершен!`,
+			'success',
+			'Успешно'
+		)
+	} else {
+		alert(`Поздравляем! Курс "${currentCourse.title}" успешно завершен!`)
+	}
+
+	// Перенаправляем на страницу курсов через небольшую задержку
+	setTimeout(() => {
+		window.location.href = 'courses.html'
+	}, 1500)
 }
 
 function updatePlayerActiveModule() {

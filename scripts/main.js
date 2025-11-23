@@ -45,6 +45,7 @@ class MainApp {
 		this.renderEmployeeInfo()
 		this.renderProgress()
 		this.renderActiveCourses()
+		this.renderFeedback()
 
 		// Для HR и руководителя показываем информационное сообщение
 		if (isHRManager() || isDepartmentHead()) {
@@ -661,6 +662,118 @@ class MainApp {
 		}
 	}
 
+	renderFeedback() {
+		// Показываем обратную связь только для сотрудников (не для HR и руководителей)
+		if (isHRManager() || isDepartmentHead()) {
+			return
+		}
+
+		const feedbackCard = document.getElementById('feedbackCard')
+		const feedbackList = document.getElementById('feedbackList')
+		if (!feedbackCard || !feedbackList) return
+
+		// Получаем ID текущего пользователя
+		const userData = AuthManager.getUserData()
+		if (!userData || !userData.employee) return
+
+		const currentUser = window.MockDB?.Users?.find(
+			u => u.email === userData.employee.email
+		)
+		if (!currentUser) return
+
+		// Загружаем обратную связь из localStorage
+		let allFeedbacks = {}
+		try {
+			const storedFeedbacks = localStorage.getItem('employeeFeedbacks')
+			if (storedFeedbacks) {
+				allFeedbacks = JSON.parse(storedFeedbacks)
+			}
+		} catch (error) {
+			console.error('Ошибка загрузки обратной связи:', error)
+			return
+		}
+
+		const employeeFeedbacks = allFeedbacks[currentUser.id] || []
+
+		if (employeeFeedbacks.length === 0) {
+			feedbackCard.style.display = 'none'
+			return
+		}
+
+		// Показываем карточку обратной связи
+		feedbackCard.style.display = 'block'
+
+		// Очищаем список
+		feedbackList.innerHTML = ''
+
+		// Отображаем каждую обратную связь
+		employeeFeedbacks.forEach(feedback => {
+			const feedbackItem = document.createElement('div')
+			feedbackItem.className = `feedback-item ${
+				feedback.read ? 'read' : 'unread'
+			}`
+			feedbackItem.style.cssText =
+				'padding: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius); margin-bottom: 1rem; position: relative; transition: all 0.3s ease;'
+
+			if (!feedback.read) {
+				feedbackItem.style.borderLeft = '4px solid var(--primary)'
+				feedbackItem.style.background = 'rgba(0, 89, 255, 0.05)'
+			}
+
+			const date = new Date(feedback.date)
+			const formattedDate = date.toLocaleDateString('ru-RU', {
+				day: 'numeric',
+				month: 'long',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+			})
+
+			feedbackItem.innerHTML = `
+				<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+					<div>
+						<div style="font-weight: 600; color: var(--text-light); margin-bottom: 0.25rem;">
+							От: ${feedback.from}
+						</div>
+						<div style="font-size: 0.9rem; color: var(--text-muted);">
+							${formattedDate}
+						</div>
+					</div>
+					${
+						!feedback.read
+							? '<span style="background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Новое</span>'
+							: ''
+					}
+				</div>
+				<div style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap;">
+					${sanitizeInput(feedback.text)}
+				</div>
+				${
+					!feedback.read
+						? `
+					<button class="btn btn-sm btn-outline" style="margin-top: 1rem;" data-feedback-id="${feedback.id}">
+						Отметить как прочитанное
+					</button>
+				`
+						: ''
+				}
+			`
+
+			// Обработчик для кнопки "Отметить как прочитанное"
+			if (!feedback.read) {
+				const markReadBtn = feedbackItem.querySelector('button')
+				if (markReadBtn) {
+					markReadBtn.addEventListener('click', () => {
+						removeFeedback(currentUser.id, feedback.id)
+						this.renderFeedback() // Перерисовываем список
+					})
+				}
+			}
+
+			feedbackList.appendChild(feedbackItem)
+		})
+	}
+
 	showError(message) {
 		const notification = document.createElement('div')
 		notification.className = 'notification error'
@@ -690,6 +803,32 @@ class MainApp {
 		setTimeout(() => {
 			notification.remove()
 		}, 5000)
+	}
+}
+
+// Функция для удаления обратной связи (после отметки как прочитанной)
+function removeFeedback(employeeId, feedbackId) {
+	try {
+		const storedFeedbacks = localStorage.getItem('employeeFeedbacks')
+		if (!storedFeedbacks) return
+
+		const allFeedbacks = JSON.parse(storedFeedbacks)
+		if (!allFeedbacks[employeeId]) return
+
+		// Удаляем обратную связь из массива
+		allFeedbacks[employeeId] = allFeedbacks[employeeId].filter(
+			f => f.id !== feedbackId
+		)
+
+		// Если у сотрудника больше нет обратной связи, удаляем его из объекта
+		if (allFeedbacks[employeeId].length === 0) {
+			delete allFeedbacks[employeeId]
+		}
+
+		// Сохраняем обновленные данные
+		localStorage.setItem('employeeFeedbacks', JSON.stringify(allFeedbacks))
+	} catch (error) {
+		console.error('Ошибка удаления обратной связи:', error)
 	}
 }
 

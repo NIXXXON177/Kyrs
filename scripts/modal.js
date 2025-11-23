@@ -398,6 +398,7 @@ style.textContent = `
 		background: rgba(0, 0, 0, 0.7);
 		backdrop-filter: blur(5px);
 		-webkit-backdrop-filter: blur(5px);
+		z-index: 0;
 	}
 
 	.modal-content {
@@ -414,7 +415,7 @@ style.textContent = `
 		overflow-y: auto;
 		transform: scale(0.9);
 		transition: transform 0.3s ease;
-		z-index: 1;
+		z-index: 2;
 	}
 
 	.modal.active .modal-content {
