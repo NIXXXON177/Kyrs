@@ -19,7 +19,23 @@ class AuthManager {
 	init() {
 		if (window.location.pathname.includes('login.html')) {
 			if (AuthManager.checkAuth()) {
-				window.location.href = '../index.html'
+				// Если пользователь уже авторизован, перенаправляем в кабинет по роли
+				const userData = AuthManager.getUserData()
+				const position =
+					(userData && userData.employee && userData.employee.position) || ''
+				const positionLower = position.toLowerCase()
+
+				let targetPath = '../index.html'
+
+				if (positionLower.includes('hr')) {
+					// HR-менеджер → управление персоналом
+					targetPath = 'hr-dashboard.html'
+				} else if (positionLower.includes('руководитель')) {
+					// Руководитель отдела → статистика отдела
+					targetPath = 'department-stats.html'
+				}
+
+				window.location.href = targetPath
 				return
 			}
 			this.setupLoginForm()
@@ -61,7 +77,22 @@ class AuthManager {
 				localStorage.setItem('authToken', authResult.token)
 				localStorage.setItem('userData', JSON.stringify(authResult.userData))
 
-				window.location.href = '../index.html'
+				// Определяем страницу назначения в зависимости от роли
+				const employee = authResult.userData && authResult.userData.employee
+				const position = (employee && employee.position) || ''
+				const positionLower = position.toLowerCase()
+
+				let targetPath = '../index.html'
+
+				if (positionLower.includes('hr')) {
+					// HR-менеджер → управление персоналом
+					targetPath = 'hr-dashboard.html'
+				} else if (positionLower.includes('руководитель')) {
+					// Руководитель отдела → статистика отдела
+					targetPath = 'department-stats.html'
+				}
+
+				window.location.href = targetPath
 			} else {
 				this.showError(authResult.message || 'Ошибка авторизации')
 			}

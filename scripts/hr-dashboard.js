@@ -325,6 +325,27 @@ async function assignCourse(employeeId) {
 			c => c.id == selectedCourseId
 		)
 		if (selectedCourse) {
+			// Сохраняем назначение курса в общую "БД" CourseUsers,
+			// чтобы все панели и отчёты видели одно и то же состояние
+			if (window.MockDB && window.MockDB.CourseUsers) {
+				const existingAssignment = window.MockDB.CourseUsers.find(
+					cu => cu.userId === employeeId && cu.courseId == selectedCourseId
+				)
+
+				if (!existingAssignment) {
+					window.MockDB.CourseUsers.push({
+						userId: employeeId,
+						courseId: selectedCourseId,
+						status: 'назначен',
+						progress: 0,
+						start: new Date().toISOString().split('T')[0],
+						due: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+							.toISOString()
+							.split('T')[0],
+					})
+				}
+			}
+
 			if (typeof NotificationManager !== 'undefined') {
 				NotificationManager.showTempNotification(
 					`Курс "${selectedCourse.title}" назначен сотруднику`,

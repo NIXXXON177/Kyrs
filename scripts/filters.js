@@ -281,7 +281,7 @@ class FilterManager {
 			modalContainer.appendChild(customModal)
 
 			// Add event listeners
-			const modalContent = customModal.querySelector('.modal-content')
+			const modalContentElement = customModal.querySelector('.modal-content')
 			const closeBtn = customModal.querySelector('.modal-close')
 			const closeModalBtn = customModal.querySelector('.close-modal-btn')
 			const startCourseBtn = customModal.querySelector('.start-course-btn')

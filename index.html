@@ -19,9 +19,9 @@
 						>
 					</div>
 					<div class="nav-menu" id="navMenu">
-						<a href="index.html" class="nav-link active">Личный кабинет</a>
 						<a href="pages/courses.html" class="nav-link">Мои курсы</a>
 						<a href="./pages/plan.html" class="nav-link">План обучения</a>
+						<a href="pages/profile.html" class="nav-link">Профиль</a>
 						<div class="user-section">
 							<span class="user-name" id="userName"></span>
 							<button class="btn-logout" id="logoutBtn">Выйти</button>
@@ -45,15 +45,8 @@
 						<!-- Уведомления будут загружены через notification.js -->
 					</div>
 
-					<!-- Информация о сотруднике -->
-					<section class="card employee-card">
-						<div class="card-header">
-							<h2 class="card-title">Персональные данные</h2>
-						</div>
-						<div class="employee-info" id="employeeInfo">
-							<!-- Данные будут загружены через main.js -->
-						</div>
-					</section>
+					<!-- Блок под информационные карточки роли -->
+					<div id="roleInfoAnchor"></div>
 
 					<!-- Процент пройденных курсов -->
 					<section class="card progress-card">

@@ -816,15 +816,47 @@ function completeCourse() {
 function finishCourse() {
 	// Обновляем данные в localStorage
 	const userData = JSON.parse(localStorage.getItem('userData'))
-	const courseIndex = userData.courses.findIndex(c => c.id === currentCourse.id)
+	if (!userData || !Array.isArray(userData.courses)) return
 
+	const courseIndex = userData.courses.findIndex(c => c.id === currentCourse.id)
 	if (courseIndex === -1) return
 
-	// Меняем статус курса на "пройден" и устанавливаем прогресс 100%
+	// Меняем статус курса на "пройден" и устанавливаем прогресс 100% в локальных данных
 	userData.courses[courseIndex].status = 'пройден'
 	userData.courses[courseIndex].progress = 100
 	currentCourse.status = 'пройден'
 	currentCourse.progress = 100
+
+	// Также синхронизируем статус с MockDB.CourseUsers, чтобы HR‑панели и отчеты видели изменения
+	if (window.MockDB && window.MockDB.Users && window.MockDB.CourseUsers) {
+		const email = userData.employee && userData.employee.email
+		const currentUser = window.MockDB.Users.find(u => u.email === email)
+
+		if (currentUser) {
+			let assignment = window.MockDB.CourseUsers.find(
+				cu => cu.userId === currentUser.id && cu.courseId === currentCourse.id
+			)
+
+			// Если записи не было (курс, например, был "зашит" в демо‑данные),
+			// создаем её, чтобы дальше все модули работали с единой структурой
+			if (!assignment) {
+				assignment = {
+					userId: currentUser.id,
+					courseId: currentCourse.id,
+					status: 'пройден',
+					progress: 100,
+					start: new Date().toISOString().split('T')[0],
+					due: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+						.toISOString()
+						.split('T')[0],
+				}
+				window.MockDB.CourseUsers.push(assignment)
+			} else {
+				assignment.status = 'пройден'
+				assignment.progress = 100
+			}
+		}
+	}
 
 	// Пересчитываем общий прогресс пользователя
 	const totalCourses = userData.courses.length

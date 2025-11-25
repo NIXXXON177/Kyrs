@@ -20,7 +20,8 @@ class CourseManagement {
 
 		this.loadCourses()
 		this.setupEventListeners()
-		this.renderCourses()
+		// Инициализируем фильтрованные курсы
+		this.filterCourses('all')
 	}
 
 	loadCourses() {
@@ -197,8 +198,12 @@ class CourseManagement {
 
 	renderCourses() {
 		const container = document.getElementById('coursesList')
-		if (!container) return
+		if (!container) {
+			console.error('Контейнер coursesList не найден!')
+			return
+		}
 
+		console.log('Рендерим курсы. Количество:', this.filteredCourses.length)
 		container.innerHTML = ''
 
 		if (this.filteredCourses.length === 0) {
@@ -260,14 +265,35 @@ class CourseManagement {
 	showAddCourseModal() {
 		this.editingCourseId = null
 		const modal = document.getElementById('courseModal')
+
 		if (!modal) {
 			console.error('Модальное окно не найдено')
 			return
 		}
-		document.getElementById('modalTitle').textContent = 'Добавить курс'
-		document.getElementById('courseForm').reset()
+
+		const modalTitle = document.getElementById('modalTitle')
+		const courseForm = document.getElementById('courseForm')
+
+		if (modalTitle) {
+			modalTitle.textContent = 'Добавить курс'
+		}
+		if (courseForm) {
+			courseForm.reset()
+		}
+
+		// Открываем модальное окно
+		modal.style.cssText = ''
 		modal.style.display = 'flex'
 		modal.style.visibility = 'visible'
+		modal.style.opacity = '1'
+
+		// Фокус на первое поле
+		setTimeout(() => {
+			const firstInput = document.getElementById('courseTitle')
+			if (firstInput) {
+				firstInput.focus()
+			}
+		}, 100)
 	}
 
 	editCourse(courseId) {
@@ -359,14 +385,31 @@ class CourseManagement {
 				description,
 				duration,
 				type,
+				// По умолчанию все новые курсы доступны сотрудникам
+				targetRoles:
+					window.MockDB && window.MockDB.UserRole
+						? [window.MockDB.UserRole.EMPLOYEE]
+						: ['employee'],
 			}
+
+			console.log('Добавляем новый курс:', newCourse)
 			this.courses.push(newCourse)
 
 			// Добавляем курс в MockDB
 			if (window.MockDB && window.MockDB.Courses) {
 				window.MockDB.Courses.push(newCourse)
+				console.log(
+					'Курс добавлен в MockDB. Всего курсов:',
+					window.MockDB.Courses.length
+				)
 			}
 		}
+
+		console.log('Текущее количество курсов:', this.courses.length)
+		console.log(
+			'Применяем фильтр:',
+			document.getElementById('courseFilter').value
+		)
 
 		this.filterCourses(document.getElementById('courseFilter').value)
 		this.closeCourseModal()
@@ -391,10 +434,18 @@ class CourseManagement {
 		if (confirmed) {
 			this.courses = this.courses.filter(c => c.id !== courseId)
 
-			// Удаляем курс из MockDB
+			// Удаляем курс из MockDB.Courses
 			if (window.MockDB && window.MockDB.Courses) {
 				window.MockDB.Courses = window.MockDB.Courses.filter(
 					c => c.id !== courseId
+				)
+			}
+
+			// Удаляем все назначения этого курса из MockDB.CourseUsers,
+			// чтобы статистика и отчёты не ссылались на несуществующий курс
+			if (window.MockDB && window.MockDB.CourseUsers) {
+				window.MockDB.CourseUsers = window.MockDB.CourseUsers.filter(
+					cu => cu.courseId !== courseId
 				)
 			}
 
@@ -407,20 +458,30 @@ class CourseManagement {
 	}
 }
 
+// Вспомогательная функция для гарантированного создания инстанса
+function ensureCourseManagementInstance() {
+	if (!window.courseManagement) {
+		window.courseManagement = new CourseManagement()
+	}
+}
+
 // Глобальные функции для кнопок
 function showAddCourseModal() {
+	ensureCourseManagementInstance()
 	if (window.courseManagement) {
 		window.courseManagement.showAddCourseModal()
 	}
 }
 
 function editCourse(courseId) {
+	ensureCourseManagementInstance()
 	if (window.courseManagement) {
 		window.courseManagement.editCourse(courseId)
 	}
 }
 
 async function assignCourseToEmployees(courseId) {
+	ensureCourseManagementInstance()
 	const course = window.courseManagement.courses.find(c => c.id === courseId)
 	if (!course) {
 		return
@@ -721,20 +782,38 @@ function showEmployeeSelectionModal(course, employees) {
 	})
 }
 
+function showAddCourseModal() {
+	ensureCourseManagementInstance()
+	if (window.courseManagement) {
+		window.courseManagement.showAddCourseModal()
+	}
+}
+
+function editCourse(courseId) {
+	ensureCourseManagementInstance()
+	if (window.courseManagement) {
+		window.courseManagement.editCourse(courseId)
+	}
+}
+
 function deleteCourse(courseId) {
+	ensureCourseManagementInstance()
 	if (window.courseManagement) {
 		window.courseManagement.deleteCourse(courseId)
 	}
 }
 
 function closeCourseModal() {
+	ensureCourseManagementInstance()
 	if (window.courseManagement) {
 		window.courseManagement.closeCourseModal()
 	}
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	if (window.location.pathname.includes('course-management.html')) {
+	// Более надёжная проверка: инициализируем, если на странице есть форма курса
+	const courseForm = document.getElementById('courseForm')
+	if (courseForm) {
 		window.courseManagement = new CourseManagement()
 	}
 })

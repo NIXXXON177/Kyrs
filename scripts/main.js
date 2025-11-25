@@ -87,71 +87,98 @@ class MainApp {
 		}
 	}
 
+	// Генерирует модули для курса на основе его названия и описания
+	generateCourseModules(course) {
+		const moduleCount = Math.ceil(course.duration / 15) // Примерно 15 минут на модуль
+		const modules = []
+		
+		const moduleTypes = ['video', 'text']
+		const completedCount = Math.floor((course.progress / 100) * moduleCount)
+		
+		for (let i = 0; i < moduleCount; i++) {
+			const isCompleted = i < completedCount
+			const type = moduleTypes[i % 2]
+			const duration = Math.floor(course.duration / moduleCount)
+			
+			modules.push({
+				title: `Модуль ${i + 1}: ${course.title}`,
+				type: type,
+				duration: `${duration} мин`,
+				completed: isCompleted,
+				content: `Содержимое модуля ${i + 1} курса "${course.title}".\n\n${course.description}\n\nВ этом модуле вы изучите важные аспекты темы и получите практические навыки. Материал разработан с учетом современных требований и лучших практик в данной области.\n\nПосле завершения этого модуля вы сможете:\n- Понимать основные концепции\n- Применять полученные знания на практике\n- Решать типовые задачи\n\nУделите достаточно времени для изучения материала и выполнения практических заданий.`
+			})
+		}
+		
+		return modules
+	}
+
 	async loadEmployeeData() {
 		try {
-			// Если структура данных недостаточна – дополнить из MockDB
-			if (
-				!this.employeeData ||
-				!this.employeeData.employee ||
-				!this.employeeData.employee.email
-			) {
-				// Получаем логин/email из localStorage или из токена авторизации (если нужно)
-				// Здесь предполагаем, что email – уникальный ключ
-				const userEmail =
-					(this.employeeData &&
-						this.employeeData.employee &&
-						this.employeeData.employee.email) ||
-					null
-				let userMock = null
-				if (window.MockDB && window.MockDB.Users) {
-					// Найти по email
-					userMock = window.MockDB.Users.find(u => u.email === userEmail)
-				}
-				if (userMock) {
-					// HR и руководитель не проходят курсы - только сотрудники
-					const isHR = userMock.role === window.MockDB.UserRole.HR
-					const isHead = userMock.role === window.MockDB.UserRole.HEAD
+			// Всегда подтягиваем актуальное состояние из MockDB по email пользователя,
+			// чтобы личный кабинет, HR‑панели и отчёты работали с одной и той же "БД"
+			const storedUserData = AuthManager.getUserData()
+			const email =
+				storedUserData &&
+				storedUserData.employee &&
+				storedUserData.employee.email
+			let userMock = null
 
-					let mappedCourses = []
-					if (!isHR && !isHead) {
-						// courses и progress достаются из связей/курсов MockDB только для сотрудников
-						const courseRefs = window.MockDB.CourseUsers.filter(
-							cu => cu.userId === userMock.id
-						)
-						const allCourses = window.MockDB.Courses
-						mappedCourses = courseRefs.map(cu => {
-							const courseInfo = allCourses.find(c => c.id === cu.courseId)
-							return {
-								...courseInfo,
-								status: cu.status,
-								progress: cu.progress,
-								start_date: cu.start,
-								due_date: cu.due,
-							}
-						})
-					}
-
-					this.employeeData = {
-						employee: {
-							name: userMock.name,
-							position: userMock.position,
-							department:
-								window.MockDB.Departments.find(
-									d => d.id === userMock.departmentId
-								)?.name || '',
-							email: userMock.email,
-						},
-						courses: mappedCourses,
-						progress:
-							mappedCourses.length > 0
-								? this.calculateOverallProgress(mappedCourses)
-								: 0,
-					}
-					localStorage.setItem('userData', JSON.stringify(this.employeeData))
-				}
+			if (email && window.MockDB && window.MockDB.Users) {
+				userMock = window.MockDB.Users.find(u => u.email === email)
 			}
-			// Данные уже загружены из localStorage при авторизации
-			// Если курсов нет, добавляем mock данные
+
+			if (userMock) {
+				const isHR = userMock.role === window.MockDB.UserRole.HR
+				const isHead = userMock.role === window.MockDB.UserRole.HEAD
+
+				let mappedCourses = []
+				if (
+					!isHR &&
+					!isHead &&
+					window.MockDB.CourseUsers &&
+					window.MockDB.Courses
+				) {
+					const courseRefs = window.MockDB.CourseUsers.filter(
+						cu => cu.userId === userMock.id
+					)
+					const allCourses = window.MockDB.Courses
+					mappedCourses = courseRefs.map(cu => {
+						const courseInfo = allCourses.find(c => c.id === cu.courseId)
+						const course = {
+							...courseInfo,
+							status: cu.status,
+							progress: cu.progress,
+							start_date: cu.start,
+							due_date: cu.due,
+						}
+						// Генерируем модули для курса
+						course.modules = this.generateCourseModules(course)
+						return course
+					})
+				}
+
+				this.employeeData = {
+					employee: {
+						name: userMock.name,
+						position: userMock.position,
+						department:
+							window.MockDB.Departments.find(
+								d => d.id === userMock.departmentId
+							)?.name || '',
+						email: userMock.email,
+					},
+					courses: mappedCourses,
+					progress:
+						mappedCourses.length > 0
+							? this.calculateOverallProgress(mappedCourses)
+							: 0,
+				}
+
+				localStorage.setItem('userData', JSON.stringify(this.employeeData))
+			}
+
+			// Если по каким‑то причинам курсов нет (демо‑режим без MockDB),
+			// подставляем мок‑данные, как раньше
 			if (!this.employeeData.courses) {
 				this.employeeData.courses = [
 					{
@@ -605,7 +632,12 @@ class MainApp {
 	}
 
 	renderRoleInfo() {
-		// Добавляем информационную карточку для HR и руководителя
+		// На странице профиля дополнительную карточку роли не показываем
+		if (window.location.pathname.includes('profile.html')) {
+			return
+		}
+
+		// Добавляем информационную карточку для HR и руководителя на главной
 		const container = document.querySelector('.container')
 		if (!container) return
 

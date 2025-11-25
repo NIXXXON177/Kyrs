@@ -7,13 +7,26 @@ class Modal {
 	}
 
 	init() {
-		// Создаем контейнер для модальных окон, если его еще нет
-		if (!document.getElementById('modalContainer')) {
-			this.modalContainer = document.createElement('div')
-			this.modalContainer.id = 'modalContainer'
-			document.body.appendChild(this.modalContainer)
-		} else {
+		// Контейнер создаётся только при первом вызове модалки
+		this.modalContainer = null
+	}
+
+	ensureContainer() {
+		if (!this.modalContainer) {
 			this.modalContainer = document.getElementById('modalContainer')
+			if (!this.modalContainer) {
+				this.modalContainer = document.createElement('div')
+				this.modalContainer.id = 'modalContainer'
+				document.body.appendChild(this.modalContainer)
+			}
+		}
+		return this.modalContainer
+	}
+
+	cleanupContainer() {
+		if (this.modalContainer && this.modalContainer.children.length === 0) {
+			this.modalContainer.remove()
+			this.modalContainer = null
 		}
 	}
 
@@ -27,7 +40,8 @@ class Modal {
 	show(message, type = 'info', title = null) {
 		return new Promise(resolve => {
 			const modal = this.createModal(message, type, title)
-			this.modalContainer.appendChild(modal)
+			const container = this.ensureContainer()
+			container.appendChild(modal)
 
 			// Анимация появления
 			setTimeout(() => {
@@ -38,6 +52,8 @@ class Modal {
 				modal.classList.remove('active')
 				setTimeout(() => {
 					modal.remove()
+					// Удаляем контейнер, если он пустой
+					this.cleanupContainer()
 					resolve()
 				}, 300)
 			}
@@ -69,7 +85,7 @@ class Modal {
 	confirm(message, title = 'Подтверждение') {
 		return new Promise(resolve => {
 			const modal = this.createConfirmModal(message, title)
-			this.modalContainer.appendChild(modal)
+			this.ensureContainer().appendChild(modal)
 
 			setTimeout(() => {
 				modal.classList.add('active')
@@ -79,6 +95,7 @@ class Modal {
 				modal.classList.remove('active')
 				setTimeout(() => {
 					modal.remove()
+					this.cleanupContainer()
 					resolve(result)
 				}, 300)
 			}
@@ -210,7 +227,7 @@ class Modal {
 				</div>
 			`
 
-			this.modalContainer.appendChild(modal)
+			this.ensureContainer().appendChild(modal)
 
 			setTimeout(() => {
 				modal.classList.add('active')
@@ -229,6 +246,7 @@ class Modal {
 				modal.classList.remove('active')
 				setTimeout(() => {
 					modal.remove()
+					this.cleanupContainer()
 					resolve(result)
 				}, 300)
 			}
@@ -300,7 +318,7 @@ class Modal {
 				</div>
 			`
 
-			this.modalContainer.appendChild(modal)
+			this.ensureContainer().appendChild(modal)
 
 			setTimeout(() => {
 				modal.classList.add('active')
@@ -319,6 +337,7 @@ class Modal {
 				modal.classList.remove('active')
 				setTimeout(() => {
 					modal.remove()
+					this.cleanupContainer()
 					resolve(result)
 				}, 300)
 			}
@@ -370,6 +389,10 @@ style.textContent = `
 		z-index: 10000;
 		pointer-events: none;
 	}
+	
+	#modalContainer > * {
+		pointer-events: auto;
+	}
 
 	.modal {
 		position: fixed;
@@ -399,6 +422,7 @@ style.textContent = `
 		backdrop-filter: blur(5px);
 		-webkit-backdrop-filter: blur(5px);
 		z-index: 0;
+		pointer-events: none;
 	}
 
 	.modal-content {
@@ -415,7 +439,8 @@ style.textContent = `
 		overflow-y: auto;
 		transform: scale(0.9);
 		transition: transform 0.3s ease;
-		z-index: 2;
+		z-index: 200;
+		pointer-events: auto;
 	}
 
 	.modal.active .modal-content {

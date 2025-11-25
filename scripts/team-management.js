@@ -23,43 +23,63 @@ class TeamManagement {
 	}
 
 	loadManagementData() {
-		// Имитируем управленческие задачи
-		this.tasks = [
-			{
-				id: 1,
-				title: 'Провести оценку эффективности команды',
-				description:
-					'Организовать quarterly review для всех сотрудников отдела',
-				priority: 'высокий',
-				dueDate: '2025-12-01',
-				status: 'в процессе',
-			},
-			{
-				id: 2,
-				title: 'Разработать план обучения на следующий квартал',
-				description:
-					'Определить необходимые навыки и курсы для развития команды',
-				priority: 'высокий',
-				dueDate: '2025-11-15',
-				status: 'назначен',
-			},
-			{
-				id: 3,
-				title: 'Организовать технический митап',
-				description: 'Провести внутренний митап по новым технологиям',
-				priority: 'средний',
-				dueDate: '2025-12-15',
-				status: 'запланирован',
-			},
-			{
-				id: 4,
-				title: 'Подготовить отчет о достижениях отдела',
-				description: 'Составить отчет для руководства компании',
-				priority: 'средний',
-				dueDate: '2025-11-30',
-				status: 'в процессе',
-			},
-		]
+		// Пытаемся загрузить задачи из localStorage,
+		// чтобы их состояние сохранялось между перезагрузками страницы
+		try {
+			const storedTasks = localStorage.getItem('teamManagementTasks')
+			if (storedTasks) {
+				this.tasks = JSON.parse(storedTasks)
+			}
+		} catch (e) {
+			console.error('Ошибка загрузки задач управления командой:', e)
+			this.tasks = []
+		}
+
+		// Если сохранённых задач ещё нет — инициализируем демо-набором и сразу сохраняем
+		if (!Array.isArray(this.tasks) || this.tasks.length === 0) {
+			this.tasks = [
+				{
+					id: 1,
+					title: 'Провести оценку эффективности команды',
+					description:
+						'Организовать quarterly review для всех сотрудников отдела',
+					priority: 'высокий',
+					dueDate: '2025-12-01',
+					status: 'в процессе',
+				},
+				{
+					id: 2,
+					title: 'Разработать план обучения на следующий квартал',
+					description:
+						'Определить необходимые навыки и курсы для развития команды',
+					priority: 'высокий',
+					dueDate: '2025-11-15',
+					status: 'назначен',
+				},
+				{
+					id: 3,
+					title: 'Организовать технический митап',
+					description: 'Провести внутренний митап по новым технологиям',
+					priority: 'средний',
+					dueDate: '2025-12-15',
+					status: 'запланирован',
+				},
+				{
+					id: 4,
+					title: 'Подготовить отчет о достижениях отдела',
+					description: 'Составить отчет для руководства компании',
+					priority: 'средний',
+					dueDate: '2025-11-30',
+					status: 'в процессе',
+				},
+			]
+
+			try {
+				localStorage.setItem('teamManagementTasks', JSON.stringify(this.tasks))
+			} catch (e) {
+				console.error('Ошибка сохранения задач управления командой:', e)
+			}
+		}
 
 		// Имитируем план развития
 		this.developmentPlan = [
@@ -227,6 +247,13 @@ class TeamManagement {
 			task.status = newStatus
 			this.renderTasks()
 
+			// Сохраняем обновлённый список задач
+			try {
+				localStorage.setItem('teamManagementTasks', JSON.stringify(this.tasks))
+			} catch (e) {
+				console.error('Ошибка сохранения задач управления командой:', e)
+			}
+
 			if (typeof NotificationManager !== 'undefined') {
 				NotificationManager.showTempNotification(
 					`Задача "${task.title}" обновлена`,
@@ -251,6 +278,16 @@ class TeamManagement {
 			if (newTitle) {
 				task.title = newTitle
 				this.renderTasks()
+
+				// Сохраняем изменения
+				try {
+					localStorage.setItem(
+						'teamManagementTasks',
+						JSON.stringify(this.tasks)
+					)
+				} catch (e) {
+					console.error('Ошибка сохранения задач управления командой:', e)
+				}
 			}
 		}
 	}

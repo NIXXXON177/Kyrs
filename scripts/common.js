@@ -78,6 +78,29 @@ function initCommon() {
 		AuthManager.updateUserNameInHeader()
 	}
 
+	// Клик по логотипу: переход в "домашнюю" страницу по роли
+	const logoLink = document.querySelector('.nav-logo a')
+	if (logoLink) {
+		logoLink.addEventListener('click', e => {
+			e.preventDefault()
+
+			let target
+			if (isHRManager()) {
+				// HR-менеджер → управление персоналом
+				target = getPagePath('hr-dashboard.html')
+			} else if (isDepartmentHead()) {
+				// Руководитель отдела → статистика отдела
+				target = getPagePath('department-stats.html')
+			} else {
+				// Обычный сотрудник → личный кабинет
+				const isInPagesFolder = window.location.pathname.includes('/pages/')
+				target = isInPagesFolder ? '../index.html' : 'index.html'
+			}
+
+			window.location.href = target
+		})
+	}
+
 	// Настройка меню в зависимости от роли
 	setupRoleBasedMenu()
 
