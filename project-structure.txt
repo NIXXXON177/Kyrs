@@ -1,0 +1,77 @@
+Структура папок
+Серийный номер тома: 8261-BCC1
+C:.
+|   index.html
+|   project-structure.txt
+|   README.md
+|   robots.txt
+|   sitemap.xml
+|   STRUCTURE.md
+|   yandex_e3c7571fb88711ae.html
+|   
++---img
+|       Logo.svg
+|       MainLogo.svg
+|       
++---pages
+|   +---auth
+|   |       login.html
+|   |       
+|   +---common
+|   |       404.html
+|   |       profile.html
+|   |       
+|   +---employee
+|   |       course-details.html
+|   |       courses.html
+|   |       plan.html
+|   |       
+|   +---hr
+|   |       course-management.html
+|   |       hr-dashboard.html
+|   |       reports.html
+|   |       
+|   \---manager
+|           department-stats.html
+|           team-management.html
+|           
++---scripts
+|   +---core
+|   |       auth.js
+|   |       common.js
+|   |       mock-db.js
+|   |       modal.js
+|   |       
+|   +---init
+|   |       course-details-init.js
+|   |       courses-init.js
+|   |       error-init.js
+|   |       index-init.js
+|   |       plan-init.js
+|   |       
+|   +---modules
+|   |       course-management.js
+|   |       course-player.js
+|   |       department-stats.js
+|   |       filters.js
+|   |       hr-dashboard.js
+|   |       main.js
+|   |       plan.js
+|   |       reports.js
+|   |       team-management.js
+|   |       
+|   \---utils
+|           notification.js
+|           
+\---style
+        animations.css
+        components.css
+        course.css
+        layout.css
+        navigation.css
+        plan.css
+        reset.css
+        style.css
+        utilities.css
+        variables.css
+        

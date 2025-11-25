@@ -1,4 +1,4 @@
-class NotificationManager {
+﻿class NotificationManager {
 	constructor(employeeData) {
 		this.employeeData = employeeData
 		this.notifications = []
@@ -165,7 +165,7 @@ class NotificationManager {
 				const isInPagesFolder = window.location.pathname.includes('/pages/')
 				const coursePath = isInPagesFolder
 					? `course-details.html?id=${notification.courseId}`
-					: `pages/course-details.html?id=${notification.courseId}`
+					: `pages/employee/course-details.html?id=${notification.courseId}`
 				window.location.href = coursePath
 			})
 		}

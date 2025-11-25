@@ -1,4 +1,4 @@
-class MainApp {
+﻿class MainApp {
 	constructor() {
 		this.employeeData = null
 		this.init()
@@ -34,7 +34,7 @@ class MainApp {
 
 	async init() {
 		if (!this.checkAuth()) {
-			window.location.href = 'pages/login.html'
+			window.location.href = 'pages/auth/login.html'
 			return
 		}
 
@@ -539,7 +539,7 @@ class MainApp {
 			const isInPagesFolder = window.location.pathname.includes('/pages/')
 			const coursePath = isInPagesFolder
 				? `course-details.html?id=${course.id}`
-				: `pages/course-details.html?id=${course.id}`
+				: `pages/employee/course-details.html?id=${course.id}`
 			window.location.href = coursePath
 		})
 

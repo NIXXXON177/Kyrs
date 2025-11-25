@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Профиль пользователя | ТехноЛайн</title>
+		<title>Детали курса | ТехноЛайн</title>
 		<link rel="stylesheet" href="../style/style.css" />
 		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
 	</head>
@@ -20,7 +20,7 @@
 					<div class="nav-menu" id="navMenu">
 						<a href="courses.html" class="nav-link">Мои курсы</a>
 						<a href="plan.html" class="nav-link">План обучения</a>
-						<a href="profile.html" class="nav-link active">Профиль</a>
+						<a href="profile.html" class="nav-link">Профиль</a>
 						<div class="user-section">
 							<span class="user-name" id="userName"></span>
 							<button class="btn-logout" id="logoutBtn">Выйти</button>
@@ -36,26 +36,34 @@
 
 			<main class="main-content">
 				<div class="container">
-					<h1 class="page-title">Профиль пользователя</h1>
+					<a
+						href="courses.html"
+						class="btn-link"
+						style="
+							display: inline-flex;
+							align-items: center;
+							gap: 0.5rem;
+							margin-bottom: 1rem;
+						"
+					>
+						← Назад к списку курсов
+					</a>
 
-					<section class="card employee-card">
-						<div class="card-header">
-							<h2 class="card-title">Персональные данные</h2>
-							<span class="role-badge" id="roleBadge"></span>
+					<div id="courseDetails">
+						<!-- Детали курса будут загружены динамически -->
+						<div class="card text-center">
+							<p>Загрузка информации о курсе...</p>
 						</div>
-						<div class="employee-info" id="employeeInfo">
-							<!-- Данные заполняются через main.js -->
-						</div>
-					</section>
+					</div>
 				</div>
 			</main>
 		</div>
 
-		<script src="../scripts/mock-db.js"></script>
-		<script src="../scripts/common.js"></script>
-		<script src="../scripts/auth.js"></script>
-		<script src="../scripts/modal.js"></script>
-		<script src="../scripts/main.js"></script>
-		<script src="../scripts/notification.js"></script>
+		<script src="../../scripts/core/mock-db.js"></script>
+		<script src="../scripts/core/common.js"></script>
+		<script src="../scripts/core/auth.js"></script>
+		<script src="../scripts/core/modal.js"></script>
+		<script src="../../scripts/utils/notification.js"></script>
+		<script src="../../scripts/init/course-details-init.js"></script>
 	</body>
 </html>

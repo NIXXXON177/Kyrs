@@ -1,4 +1,4 @@
-// Общие функции для всех страниц
+﻿// Общие функции для всех страниц
 
 /**
  * Санитизация пользовательского ввода для защиты от XSS
@@ -114,7 +114,7 @@ function initCommon() {
 			const isMainPage =
 				window.location.pathname.endsWith('index.html') ||
 				window.location.pathname.endsWith('/')
-			window.location.href = isMainPage ? 'pages/login.html' : 'login.html'
+			window.location.href = isMainPage ? 'pages/auth/login.html' : 'login.html'
 		})
 	}
 
