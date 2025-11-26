@@ -1,20 +1,20 @@
-@import url('variables.css');
+@import url('./variables.css');
 
-@import url('reset.css');
+@import url('./reset.css');
 
-@import url('layout.css');
+@import url('./layout.css');
 
-@import url('navigation.css');
+@import url('./navigation.css');
 
-@import url('components.css');
+@import url('./components.css');
 
-@import url('course.css');
+@import url('./course.css');
 
-@import url('plan.css');
+@import url('./plan.css');
 
-@import url('animations.css');
+@import url('./animations.css');
 
-@import url('utilities.css');
+@import url('./utilities.css');
 
 /* Стили для печати */
 @media print {
@@ -1394,10 +1394,13 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	display: flex;
+	display: none;
 	align-items: center;
 	justify-content: center;
 	z-index: 10000;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(5px);
+	-webkit-backdrop-filter: blur(5px);
 }
 
 /* Модальное окно курса должно быть выше #modalContainer */
@@ -1417,6 +1420,12 @@
 .modal[style*='display: block'],
 .modal[style*='display:block'] {
 	display: flex !important;
+	animation: fadeIn 0.3s ease-out;
+}
+
+.modal[style*='display: block'] .modal-content,
+.modal[style*='display:block'] .modal-content {
+	animation: modalSlideIn 0.3s ease-out;
 }
 
 /* Стили для select/фильтра курсов */
@@ -1502,14 +1511,38 @@ select.form-select option:checked {
 .modal-content {
 	position: relative;
 	background: var(--glass-bg);
+	backdrop-filter: blur(25px) saturate(180%);
+	-webkit-backdrop-filter: blur(25px) saturate(180%);
+	border: 1px solid var(--glass-border);
 	border-radius: 12px;
 	width: 90%;
 	max-width: 500px;
 	max-height: 90vh;
 	overflow-y: auto;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), var(--glass-shadow);
 	z-index: 100;
 	pointer-events: auto;
+	margin: 2rem;
+}
+
+/* Скроллбар для модального окна */
+.modal-content::-webkit-scrollbar {
+	width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+	background: var(--glass-bg);
+	border-radius: 4px;
+	border: 1px solid var(--glass-border);
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.15);
 }
 
 .modal-header {
@@ -1850,275 +1883,3 @@ select.form-select option:checked {
 	min-width: 180px;
 }
 
-/* Стили для модального окна деталей курса */
-.course-details-modal .modal-content {
-	max-width: 700px;
-	max-height: 90vh;
-	padding: 0;
-	overflow: hidden;
-}
-
-.course-modal-content {
-	padding: 2rem;
-}
-
-.course-modal-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	margin-bottom: 2rem;
-	padding-bottom: 1.5rem;
-	border-bottom: 2px solid var(--glass-border);
-	position: relative;
-}
-
-.course-modal-header::after {
-	content: '';
-	position: absolute;
-	bottom: -2px;
-	left: 0;
-	width: 80px;
-	height: 2px;
-	background: linear-gradient(90deg, var(--primary), var(--accent));
-	border-radius: 2px;
-}
-
-.course-modal-title {
-	margin: 0;
-	font-size: 1.75rem;
-	font-weight: 700;
-	color: var(--text-light);
-	line-height: 1.3;
-	flex: 1;
-	padding-right: 1rem;
-	background: linear-gradient(
-		135deg,
-		var(--text-light) 0%,
-		rgba(255, 255, 255, 0.8) 100%
-	);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-}
-
-.course-modal-status {
-	padding: 0.6rem 1.2rem;
-	border-radius: 25px;
-	font-size: 0.85rem;
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	white-space: nowrap;
-}
-
-.course-modal-status.status-completed {
-	background: linear-gradient(
-		135deg,
-		rgba(76, 175, 80, 0.3),
-		rgba(76, 175, 80, 0.15)
-	);
-	color: #66bb6a;
-	border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-.course-modal-status.status-in-progress {
-	background: linear-gradient(
-		135deg,
-		rgba(255, 152, 0, 0.3),
-		rgba(255, 152, 0, 0.15)
-	);
-	color: #ffa726;
-	border: 1px solid rgba(255, 152, 0, 0.3);
-}
-
-.course-modal-status.status-upcoming {
-	background: linear-gradient(
-		135deg,
-		rgba(33, 150, 243, 0.3),
-		rgba(33, 150, 243, 0.15)
-	);
-	color: #42a5f5;
-	border: 1px solid rgba(33, 150, 243, 0.3);
-}
-
-.course-modal-status.status-expired {
-	background: linear-gradient(
-		135deg,
-		rgba(244, 67, 54, 0.3),
-		rgba(244, 67, 54, 0.15)
-	);
-	color: #ef5350;
-	border: 1px solid rgba(244, 67, 54, 0.3);
-}
-
-.course-modal-body {
-	margin-bottom: 2rem;
-}
-
-.course-modal-info .info-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 1.5rem;
-	margin-bottom: 2rem;
-}
-
-.course-modal-info .info-item {
-	background: rgba(255, 255, 255, 0.03);
-	padding: 1.25rem;
-	border-radius: 12px;
-	border: 1px solid var(--glass-border);
-	transition: all 0.3s ease;
-}
-
-.course-modal-info .info-item:hover {
-	background: rgba(255, 255, 255, 0.05);
-	border-color: rgba(102, 126, 234, 0.3);
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-}
-
-.course-modal-info .info-item h4 {
-	margin: 0 0 0.75rem 0;
-	font-size: 0.8rem;
-	color: var(--text-muted);
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.course-modal-info .info-item h4::before {
-	content: '•';
-	color: var(--primary);
-	font-size: 1.2rem;
-}
-
-.course-modal-info .info-item p {
-	margin: 0;
-	font-size: 1.1rem;
-	color: var(--text-light);
-	font-weight: 600;
-}
-
-.course-description {
-	background: rgba(102, 126, 234, 0.05);
-	padding: 1.5rem;
-	border-radius: 12px;
-	border-left: 4px solid var(--primary);
-}
-
-.course-description h4 {
-	margin: 0 0 1rem 0;
-	font-size: 1.1rem;
-	color: var(--text-light);
-	font-weight: 700;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.course-description h4::before {
-	content: '📖';
-	font-size: 1.3rem;
-}
-
-.course-description p {
-	margin: 0;
-	line-height: 1.7;
-	color: var(--text-muted);
-	font-size: 1rem;
-}
-
-.course-modal-actions {
-	display: flex;
-	gap: 1rem;
-	justify-content: flex-end;
-	padding-top: 2rem;
-	border-top: 2px solid var(--glass-border);
-}
-
-.course-modal-actions .btn {
-	padding: 0.875rem 2rem;
-	font-size: 1rem;
-	font-weight: 600;
-	border-radius: 10px;
-	transition: all 0.3s ease;
-}
-
-.course-modal-actions .btn-primary {
-	background: linear-gradient(135deg, var(--primary), var(--accent));
-	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-.course-modal-actions .btn-primary:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-.course-modal-actions .btn-secondary {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid var(--glass-border);
-}
-
-.course-modal-actions .btn-secondary:hover {
-	background: rgba(255, 255, 255, 0.1);
-	border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Кнопка закрытия модального окна */
-.course-details-modal .modal-close {
-	position: absolute;
-	top: 1.5rem;
-	right: 1.5rem;
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid var(--glass-border);
-	color: var(--text-light);
-	font-size: 1.5rem;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.3s ease;
-	z-index: 10;
-}
-
-.course-details-modal .modal-close:hover {
-	background: rgba(244, 67, 54, 0.2);
-	border-color: rgba(244, 67, 54, 0.4);
-	color: #ef5350;
-	transform: rotate(90deg);
-}
-
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-	.course-details-modal .modal-content {
-		max-width: 95%;
-	}
-
-	.course-modal-content {
-		padding: 1.5rem;
-	}
-
-	.course-modal-title {
-		font-size: 1.4rem;
-	}
-
-	.course-modal-info .info-grid {
-		grid-template-columns: 1fr;
-		gap: 1rem;
-	}
-
-	.course-modal-actions {
-		flex-direction: column-reverse;
-	}
-
-	.course-modal-actions .btn {
-		width: 100%;
-	}
-}

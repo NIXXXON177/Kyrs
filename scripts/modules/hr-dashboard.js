@@ -7,13 +7,13 @@ class HRDashboard {
 
 	init() {
 		if (!AuthManager.checkAuth()) {
-			window.location.href = 'login.html'
+			window.location.href = buildPathFromRoot('pages/auth/login.html')
 			return
 		}
 
 		// Проверяем роль
 		if (!isHRManager()) {
-			window.location.href = '../index.html'
+			window.location.href = buildPathFromRoot('index.html')
 			return
 		}
 

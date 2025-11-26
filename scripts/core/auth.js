@@ -25,17 +25,7 @@ class AuthManager {
 					(userData && userData.employee && userData.employee.position) || ''
 				const positionLower = position.toLowerCase()
 
-				let targetPath = '../index.html'
-
-				if (positionLower.includes('hr')) {
-					// HR-менеджер → управление персоналом
-					targetPath = 'hr-dashboard.html'
-				} else if (positionLower.includes('руководитель')) {
-					// Руководитель отдела → статистика отдела
-					targetPath = 'department-stats.html'
-				}
-
-				window.location.href = targetPath
+				window.location.href = AuthManager.getTargetPath(positionLower)
 				return
 			}
 			this.setupLoginForm()
@@ -82,17 +72,7 @@ class AuthManager {
 				const position = (employee && employee.position) || ''
 				const positionLower = position.toLowerCase()
 
-				let targetPath = '../index.html'
-
-				if (positionLower.includes('hr')) {
-					// HR-менеджер → управление персоналом
-					targetPath = 'hr-dashboard.html'
-				} else if (positionLower.includes('руководитель')) {
-					// Руководитель отдела → статистика отдела
-					targetPath = 'department-stats.html'
-				}
-
-				window.location.href = targetPath
+				window.location.href = AuthManager.getTargetPath(positionLower)
 			} else {
 				this.showError(authResult.message || 'Ошибка авторизации')
 			}
@@ -607,6 +587,16 @@ class AuthManager {
 			}
 		}
 	}
+}
+
+AuthManager.getTargetPath = function (positionLower = '') {
+	if (positionLower.includes('hr')) {
+		return '../hr/hr-dashboard.html'
+	}
+	if (positionLower.includes('руководитель')) {
+		return '../manager/department-stats.html'
+	}
+	return '../../index.html'
 }
 
 if (window.location.pathname.includes('login.html')) {

@@ -304,7 +304,12 @@ function createCourseMaterials(course) {
 		},
 	]
 
-	mockMaterials.forEach(material => {
+	const materialsSource =
+		Array.isArray(course.materials) && course.materials.length > 0
+			? course.materials
+			: mockMaterials
+
+	materialsSource.forEach(material => {
 		const materialItem = createMaterialItem(material)
 		materialsList.appendChild(materialItem)
 	})
@@ -318,35 +323,52 @@ function createMaterialItem(material) {
 	const item = document.createElement('div')
 	item.className = 'material-item'
 
+	const type = material.type || 'link'
+	const safeTitle =
+		typeof sanitizeInput === 'function'
+			? sanitizeInput(material.title || 'Материал')
+			: material.title || 'Материал'
+	const safeType =
+		typeof sanitizeInput === 'function'
+			? sanitizeInput(type)
+			: type
+	const url = material.url || ''
+
 	const icon = document.createElement('div')
-	icon.className = `material-icon ${material.type}`
+	icon.className = `material-icon ${safeType}`
 	icon.textContent =
-		material.type === 'pdf' ? '📄' : material.type === 'video' ? '🎥' : '🔗'
+		safeType === 'pdf' ? '📄' : safeType === 'video' ? '🎥' : '🔗'
 
 	const content = document.createElement('div')
 	content.className = 'material-content'
 
 	const itemTitle = document.createElement('div')
 	itemTitle.className = 'material-title'
-	itemTitle.textContent = material.title
+	itemTitle.textContent = safeTitle
 
 	const itemType = document.createElement('div')
 	itemType.className = 'material-type'
 	itemType.textContent =
-		material.type === 'pdf'
+		safeType === 'pdf'
 			? 'PDF документ'
-			: material.type === 'video'
+			: safeType === 'video'
 			? 'Видео материал'
 			: 'Ссылка на ресурс'
 
 	const button = document.createElement('a')
-	button.href = material.url
-	button.className = `material-btn ${material.type}`
-	button.target = '_blank'
+	button.href = url || '#'
+	button.className = `material-btn ${safeType}`
+	if (url) {
+		button.target = '_blank'
+		button.rel = 'noopener noreferrer'
+	} else {
+		button.classList.add('is-disabled')
+		button.setAttribute('aria-disabled', 'true')
+	}
 	button.textContent =
-		material.type === 'pdf'
+		safeType === 'pdf'
 			? 'Скачать'
-			: material.type === 'video'
+			: safeType === 'video'
 			? 'Смотреть'
 			: 'Перейти'
 
@@ -566,6 +588,8 @@ function createPlayerProgressSection() {
 		? currentCourse.modules.filter(m => m && m.completed).length
 		: 0
 	const totalModules = currentCourse.modules ? currentCourse.modules.length : 0
+	const progressPercent =
+		totalModules > 0 ? (completedModules / totalModules) * 100 : 0
 	const allModulesCompleted =
 		completedModules === totalModules && totalModules > 0
 	const isCourseCompleted = currentCourse.status === 'пройден'
@@ -582,7 +606,7 @@ function createPlayerProgressSection() {
 	const progressFill = document.createElement('div')
 	progressFill.style.cssText =
 		'height: 100%; background: var(--gradient); border-radius: 4px; transition: width 0.3s ease;'
-	progressFill.style.width = `${(completedModules / totalModules) * 100}%`
+	progressFill.style.width = `${progressPercent}%`
 
 	progressBar.appendChild(progressFill)
 	section.appendChild(progressText)
@@ -620,6 +644,7 @@ function createPlayerContentArea() {
 		'display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--glass-border);'
 
 	const prevBtn = document.createElement('button')
+	prevBtn.id = 'playerPrevBtn'
 	prevBtn.className = 'btn btn-secondary'
 	prevBtn.innerHTML = '← Предыдущий'
 	prevBtn.addEventListener('click', () => {
@@ -627,6 +652,7 @@ function createPlayerContentArea() {
 	})
 
 	const nextBtn = document.createElement('button')
+	nextBtn.id = 'playerNextBtn'
 	nextBtn.className = 'btn btn-primary'
 	nextBtn.innerHTML = 'Следующий →'
 	nextBtn.addEventListener('click', () => {
@@ -647,7 +673,9 @@ function createPlayerContentArea() {
 
 function loadPlayerModule(moduleIndex) {
 	if (
-		!currentCourse.modules ||
+		!currentCourse ||
+		!Array.isArray(currentCourse.modules) ||
+		currentCourse.modules.length === 0 ||
 		moduleIndex < 0 ||
 		moduleIndex >= currentCourse.modules.length
 	) {
@@ -724,9 +752,18 @@ function loadPlayerModule(moduleIndex) {
 
 	// Обновляем активный модуль в сайдбаре
 	updatePlayerActiveModule()
+	updateNavigationButtons()
 }
 
 function completePlayerModule(moduleIndex) {
+	if (
+		!currentCourse ||
+		!Array.isArray(currentCourse.modules) ||
+		!currentCourse.modules[moduleIndex]
+	) {
+		return
+	}
+
 	currentCourse.modules[moduleIndex].completed = true
 
 	// Проверяем, все ли модули пройдены
@@ -737,24 +774,61 @@ function completePlayerModule(moduleIndex) {
 	const isCourseCompleted = completedModules === totalModules
 
 	// Обновляем данные в localStorage
-	const userData = JSON.parse(localStorage.getItem('userData'))
+	const rawUserData = localStorage.getItem('userData')
+	if (!rawUserData) return
+
+	let userData = null
+	try {
+		userData = JSON.parse(rawUserData)
+	} catch (error) {
+		console.error('Ошибка чтения данных пользователя:', error)
+		return
+	}
+
+	if (!userData || !Array.isArray(userData.courses)) {
+		return
+	}
+
 	const courseIndex = userData.courses.findIndex(c => c.id === currentCourse.id)
 
 	// Обновляем прогресс курса
-	const progressPercent = Math.round((completedModules / totalModules) * 100)
-	userData.courses[courseIndex].progress = progressPercent
+	const progressPercent =
+		totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0
+
+	if (courseIndex === -1) return
+
+	const courseInstance = userData.courses[courseIndex]
+	if (Array.isArray(courseInstance.modules)) {
+		if (!courseInstance.modules[moduleIndex]) {
+			courseInstance.modules[moduleIndex] = {}
+		}
+		courseInstance.modules[moduleIndex].completed = true
+	}
+
+	courseInstance.progress = progressPercent
 	currentCourse.progress = progressPercent
 
 	// Меняем статус на "в процессе", если еще не завершен
 	if (
-		userData.courses[courseIndex].status !== 'пройден' &&
-		userData.courses[courseIndex].status !== 'в процессе'
+		courseInstance.status !== 'пройден' &&
+		courseInstance.status !== 'в процессе'
 	) {
-		userData.courses[courseIndex].status = 'в процессе'
+		courseInstance.status = 'в процессе'
 		currentCourse.status = 'в процессе'
 	}
 
 	localStorage.setItem('userData', JSON.stringify(userData))
+
+	// Сохраняем прогресс в назначениях курсов
+	const currentUserId = getCurrentUserId()
+	if (currentUserId && typeof updateAssignedCourseRecord === 'function') {
+		updateAssignedCourseRecord(currentUserId, currentCourse.id, {
+			status: 'в процессе',
+			progress: progressPercent,
+		})
+	}
+
+	syncCourseProgressWithMockDB(progressPercent, 'в процессе')
 
 	// Показываем уведомление
 	const message = isCourseCompleted
@@ -855,8 +929,17 @@ function finishCourse() {
 				assignment.status = 'пройден'
 				assignment.progress = 100
 			}
+
+			if (typeof updateAssignedCourseRecord === 'function') {
+				updateAssignedCourseRecord(currentUser.id, currentCourse.id, {
+					status: 'пройден',
+					progress: 100,
+				})
+			}
 		}
 	}
+
+	syncCourseProgressWithMockDB(100, 'пройден')
 
 	// Пересчитываем общий прогресс пользователя
 	const totalCourses = userData.courses.length
@@ -902,6 +985,57 @@ function updatePlayerActiveModule() {
 	})
 }
 
+function updateNavigationButtons() {
+	const prevBtn = document.getElementById('playerPrevBtn')
+	const nextBtn = document.getElementById('playerNextBtn')
+
+	if (!currentCourse || !Array.isArray(currentCourse.modules)) {
+		if (prevBtn) prevBtn.disabled = true
+		if (nextBtn) nextBtn.disabled = true
+		return
+	}
+
+	if (prevBtn) {
+		prevBtn.disabled = currentModuleIndex <= 0
+	}
+
+	if (nextBtn) {
+		nextBtn.disabled =
+			currentModuleIndex >= currentCourse.modules.length - 1
+	}
+}
+
+function syncCourseProgressWithMockDB(progress, status) {
+	if (
+		!currentCourse ||
+		!window.MockDB ||
+		!Array.isArray(window.MockDB.CourseUsers)
+	) {
+		return
+	}
+
+	const userId = getCurrentUserId()
+	if (!userId) return
+
+	const assignment = window.MockDB.CourseUsers.find(
+		cu => cu.userId === userId && cu.courseId === currentCourse.id
+	)
+
+	if (!assignment) {
+		return
+	}
+
+	if (typeof progress === 'number') {
+		assignment.progress = progress
+	}
+
+	if (status) {
+		assignment.status = status
+	} else if (progress > 0 && assignment.status === 'назначен') {
+		assignment.status = 'в процессе'
+	}
+}
+
 // Вспомогательные функции
 function getStatusClass(status) {
 	switch (status) {
@@ -915,6 +1049,20 @@ function getStatusClass(status) {
 			return 'status-expired'
 		default:
 			return ''
+	}
+}
+
+function getCurrentUserId() {
+	try {
+		const userData = AuthManager?.getUserData()
+		const email = userData?.employee?.email
+		if (!email || !window.MockDB || !Array.isArray(window.MockDB.Users)) {
+			return null
+		}
+		const currentUser = window.MockDB.Users.find(u => u.email === email)
+		return currentUser ? currentUser.id : null
+	} catch {
+		return null
 	}
 }
 
@@ -939,19 +1087,26 @@ function formatDate(dateString) {
 }
 
 function getCertificateStatus(course) {
+	const hasCertificate = course?.certificateAvailable !== false
+	if (!hasCertificate) {
+		return 'Сертификат не предусмотрен'
+	}
+
 	if (course.status === 'пройден') {
 		return 'Сертификат получен'
-	} else if (course.status === 'в процессе') {
-		return 'Сертификат будет доступен после завершения'
-	} else {
-		return 'Сертификат не доступен'
 	}
+
+	if (course.status === 'в процессе') {
+		return 'Сертификат будет доступен после завершения'
+	}
+
+	return 'Сертификат не доступен'
 }
 
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', function () {
 	if (!AuthManager.checkAuth()) {
-		window.location.href = 'login.html'
+		window.location.href = buildPathFromRoot('pages/auth/login.html')
 		return
 	}
 

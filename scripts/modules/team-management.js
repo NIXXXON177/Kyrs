@@ -1,32 +1,37 @@
+const TEAM_TASKS_STORAGE_KEY = 'teamManagementTasks'
+const DEPARTMENT_GOALS_STORAGE_KEY = 'departmentGoals'
+
 class TeamManagement {
 	constructor() {
 		this.tasks = []
 		this.developmentPlan = []
+		this.departmentGoals = []
 		this.init()
 	}
 
 	init() {
 		if (!AuthManager.checkAuth()) {
-			window.location.href = 'login.html'
+			window.location.href = buildPathFromRoot('pages/auth/login.html')
 			return
 		}
 
 		// Проверяем роль
 		if (!isDepartmentHead()) {
-			window.location.href = '../index.html'
+			window.location.href = buildPathFromRoot('index.html')
 			return
 		}
 
 		this.loadManagementData()
 		this.renderTasks()
 		this.renderDevelopmentPlan()
+		this.renderDepartmentGoals()
 	}
 
 	loadManagementData() {
 		// Пытаемся загрузить задачи из localStorage,
 		// чтобы их состояние сохранялось между перезагрузками страницы
 		try {
-			const storedTasks = localStorage.getItem('teamManagementTasks')
+			const storedTasks = localStorage.getItem(TEAM_TASKS_STORAGE_KEY)
 			if (storedTasks) {
 				this.tasks = JSON.parse(storedTasks)
 			}
@@ -35,8 +40,12 @@ class TeamManagement {
 			this.tasks = []
 		}
 
-		// Если сохранённых задач ещё нет — инициализируем демо-набором и сразу сохраняем
-		if (!Array.isArray(this.tasks) || this.tasks.length === 0) {
+		if (!Array.isArray(this.tasks)) {
+			this.tasks = []
+		}
+
+		// Если сохранённых задач ещё нет — инициализируем демо-набором
+		if (this.tasks.length === 0) {
 			this.tasks = [
 				{
 					id: 1,
@@ -73,13 +82,13 @@ class TeamManagement {
 					status: 'в процессе',
 				},
 			]
-
-			try {
-				localStorage.setItem('teamManagementTasks', JSON.stringify(this.tasks))
-			} catch (e) {
-				console.error('Ошибка сохранения задач управления командой:', e)
-			}
 		}
+
+		// Нормализуем существующие записи и сохраняем их в актуальном виде
+		this.tasks = this.tasks.map(task => this.normalizeTask(task))
+		this.saveTasks()
+
+		this.departmentGoals = this.loadDepartmentGoals()
 
 		// Имитируем план развития
 		this.developmentPlan = [
@@ -110,6 +119,49 @@ class TeamManagement {
 				],
 			},
 		]
+	}
+
+	saveTasks() {
+		try {
+			localStorage.setItem(TEAM_TASKS_STORAGE_KEY, JSON.stringify(this.tasks))
+		} catch (e) {
+			console.error('Ошибка сохранения задач управления командой:', e)
+		}
+	}
+
+	loadDepartmentGoals() {
+		try {
+			const stored = localStorage.getItem(DEPARTMENT_GOALS_STORAGE_KEY)
+			if (!stored) {
+				return []
+			}
+
+			const parsed = JSON.parse(stored)
+			if (!Array.isArray(parsed)) {
+				return []
+			}
+
+			return parsed
+				.map(goal => this.normalizeGoal(goal))
+				.sort(
+					(a, b) =>
+						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+				)
+		} catch (error) {
+			console.error('Ошибка загрузки целей отдела:', error)
+			return []
+		}
+	}
+
+	saveDepartmentGoals() {
+		try {
+			localStorage.setItem(
+				DEPARTMENT_GOALS_STORAGE_KEY,
+				JSON.stringify(this.departmentGoals)
+			)
+		} catch (error) {
+			console.error('Ошибка сохранения целей отдела:', error)
+		}
 	}
 
 	renderTasks() {
@@ -202,6 +254,76 @@ class TeamManagement {
 		return card
 	}
 
+	renderDepartmentGoals() {
+		const container = document.getElementById('departmentGoalsList')
+		const emptyState = document.getElementById('departmentGoalsEmpty')
+		if (!container) return
+
+		container.innerHTML = ''
+
+		if (!this.departmentGoals.length) {
+			container.classList.add('hidden')
+			if (emptyState) {
+				emptyState.classList.remove('hidden')
+			}
+			return
+		}
+
+		container.classList.remove('hidden')
+		if (emptyState) {
+			emptyState.classList.add('hidden')
+		}
+
+		this.departmentGoals.forEach(goal => {
+			container.appendChild(this.createGoalCard(goal))
+		})
+	}
+
+	createGoalCard(goal) {
+		const card = document.createElement('div')
+		card.className = 'department-goal-card'
+
+		const safeText =
+			typeof sanitizeInput === 'function'
+				? sanitizeInput(goal.text)
+				: goal.text
+		const createdLabel = this.formatGoalTimestamp(goal.createdAt)
+
+		card.innerHTML = `
+			<div class="department-goal-icon">🎯</div>
+			<div>
+				<p class="department-goal-text">${safeText}</p>
+				<span class="department-goal-meta">${createdLabel}</span>
+			</div>
+		`
+
+		return card
+	}
+
+	addGoal(goalText) {
+		const trimmedGoal = (goalText || '').trim()
+		if (!trimmedGoal) {
+			this.showValidationMessage(
+				'Введите текст цели.',
+				'warning',
+				'Валидация'
+			)
+			return null
+		}
+
+		const goal = {
+			id: Date.now(),
+			text: trimmedGoal,
+			createdAt: new Date().toISOString(),
+		}
+
+		this.departmentGoals.unshift(goal)
+		this.saveDepartmentGoals()
+		this.renderDepartmentGoals()
+
+		return goal
+	}
+
 	getTaskStatusClass(status) {
 		switch (status) {
 			case 'завершен':
@@ -237,8 +359,32 @@ class TeamManagement {
 	}
 
 	formatDate(dateString) {
+		if (!dateString) {
+			return 'Срок не указан'
+		}
+
 		const date = new Date(dateString)
+		if (Number.isNaN(date.getTime())) {
+			return 'Срок не указан'
+		}
+
 		return date.toLocaleDateString('ru-RU')
+	}
+
+	formatGoalTimestamp(dateString) {
+		if (!dateString) {
+			return 'Добавлено недавно'
+		}
+
+		const date = new Date(dateString)
+		if (Number.isNaN(date.getTime())) {
+			return 'Добавлено недавно'
+		}
+
+		return `Добавлено ${date.toLocaleString('ru-RU', {
+			dateStyle: 'medium',
+			timeStyle: 'short',
+		})}`
 	}
 
 	updateTaskStatus(taskId, newStatus) {
@@ -248,11 +394,7 @@ class TeamManagement {
 			this.renderTasks()
 
 			// Сохраняем обновлённый список задач
-			try {
-				localStorage.setItem('teamManagementTasks', JSON.stringify(this.tasks))
-			} catch (e) {
-				console.error('Ошибка сохранения задач управления командой:', e)
-			}
+			this.saveTasks()
 
 			if (typeof NotificationManager !== 'undefined') {
 				NotificationManager.showTempNotification(
@@ -265,36 +407,323 @@ class TeamManagement {
 
 	async editTask(taskId) {
 		const task = this.tasks.find(t => t.id === taskId)
-		if (task) {
-			const newTitle =
-				typeof modal !== 'undefined'
-					? await modal.prompt(
-							'Введите новое название задачи:',
-							'Редактирование задачи',
-							task.title
-					  )
-					: prompt('Введите новое название задачи:', task.title)
+		if (!task) return
 
-			if (newTitle) {
-				task.title = newTitle
-				this.renderTasks()
+		const newTitle =
+			typeof modal !== 'undefined'
+				? await modal.prompt(
+						'Введите новое название задачи:',
+						'Редактирование задачи',
+						task.title
+				  )
+				: prompt('Введите новое название задачи:', task.title)
 
-				// Сохраняем изменения
-				try {
-					localStorage.setItem(
-						'teamManagementTasks',
-						JSON.stringify(this.tasks)
-					)
-				} catch (e) {
-					console.error('Ошибка сохранения задач управления командой:', e)
-				}
+		if (newTitle === null) return
+
+		const trimmedTitle = newTitle.trim()
+		if (!trimmedTitle) {
+			this.showValidationMessage(
+				'Название задачи не может быть пустым.',
+				'warning',
+				'Валидация'
+			)
+			return
+		}
+
+		const newDescription =
+			typeof modal !== 'undefined'
+				? await modal.prompt(
+						'Введите описание задачи:',
+						'Редактирование задачи',
+						task.description
+				  )
+				: prompt('Введите описание задачи:', task.description)
+
+		if (newDescription === null) return
+
+		const trimmedDescription = newDescription.trim()
+		if (!trimmedDescription) {
+			this.showValidationMessage(
+				'Описание задачи не может быть пустым.',
+				'warning',
+				'Валидация'
+			)
+			return
+		}
+
+		let prioritySelection = task.priority
+		if (typeof modal !== 'undefined' && typeof modal.select === 'function') {
+			const result = await modal.select(
+				'Выберите приоритет задачи:',
+				[
+					{ value: 'высокий', label: 'Высокий' },
+					{ value: 'средний', label: 'Средний' },
+					{ value: 'низкий', label: 'Низкий' },
+				],
+				'Редактирование задачи'
+			)
+			if (result === null) return
+			if (result) {
+				prioritySelection = result
 			}
+		} else {
+			const manualPriority = prompt(
+				'Введите приоритет (высокий/средний/низкий):',
+				task.priority
+			)
+			if (manualPriority === null) return
+			if (manualPriority) {
+				prioritySelection = manualPriority
+			}
+		}
+
+		const normalizedPriority = this.normalizePriority(prioritySelection)
+
+		const dueDateValue = await this.requestValidDueDate({
+			defaultValue: task.dueDate || this.getDefaultDueDate(),
+			title: 'Редактирование задачи',
+		})
+
+		if (dueDateValue === null) return
+
+		task.title = trimmedTitle
+		task.description = trimmedDescription
+		task.priority = normalizedPriority
+		task.dueDate = dueDateValue
+
+		this.saveTasks()
+		this.renderTasks()
+	}
+
+	async createTask() {
+		const titlePrompt =
+			typeof modal !== 'undefined'
+				? await modal.prompt(
+						'Введите название задачи:',
+						'Новая задача',
+						'Новая управленческая задача'
+				  )
+				: prompt('Введите название задачи:')
+
+		if (titlePrompt === null) return
+
+		const descriptionPrompt =
+			typeof modal !== 'undefined'
+				? await modal.prompt(
+						'Введите описание задачи:',
+						'Новая задача',
+						'Описание задачи'
+				  )
+				: prompt('Введите описание задачи:', 'Описание задачи')
+
+		if (descriptionPrompt === null) return
+
+		const title = titlePrompt
+		const description = descriptionPrompt
+
+		let priority = 'средний'
+		if (typeof modal !== 'undefined' && typeof modal.select === 'function') {
+			const result = await modal.select(
+				'Выберите приоритет задачи:',
+				[
+					{ value: 'высокий', label: 'Высокий' },
+					{ value: 'средний', label: 'Средний' },
+					{ value: 'низкий', label: 'Низкий' },
+				],
+				'Приоритет задачи'
+			)
+			if (result) {
+				priority = result
+			}
+		} else {
+			const manualPriority = prompt(
+				'Введите приоритет (высокий/средний/низкий):',
+				'средний'
+			)
+			if (manualPriority) {
+				priority = manualPriority.toLowerCase()
+			}
+		}
+
+		const dueDateValue = await this.requestValidDueDate({
+			defaultValue: this.getDefaultDueDate(),
+			title: 'Срок задачи',
+		})
+
+		if (dueDateValue === null) return
+
+		const trimmedTitle = (title || '').trim()
+		const trimmedDescription = (description || '').trim()
+
+		const priorityNormalized = this.normalizePriority(priority)
+
+		if (!trimmedTitle) {
+			this.showValidationMessage(
+				'Введите название задачи.',
+				'warning',
+				'Валидация'
+			)
+			return
+		}
+
+		if (!trimmedDescription) {
+			this.showValidationMessage(
+				'Введите описание задачи.',
+				'warning',
+				'Валидация'
+			)
+			return
+		}
+
+		const newTask = {
+			id: Date.now(),
+			title: trimmedTitle,
+			description: trimmedDescription,
+			priority: priorityNormalized,
+			dueDate: dueDateValue,
+			status: 'запланирован',
+		}
+
+		this.tasks.unshift(newTask)
+		this.saveTasks()
+		this.renderTasks()
+
+		if (typeof NotificationManager !== 'undefined') {
+			NotificationManager.showTempNotification(
+				`Задача "${newTask.title}" добавлена`,
+				'success'
+			)
+		}
+	}
+	normalizePriority(priority) {
+		const allowed = ['высокий', 'средний', 'низкий']
+		const normalized = (priority || '').toLowerCase().trim()
+		return allowed.includes(normalized) ? normalized : 'средний'
+	}
+	
+	validateDueDate(dateString, options = {}) {
+		const { allowPast = false } = options
+
+		if (!dateString) {
+			return { isValid: false, message: 'Срок выполнения обязателен.' }
+		}
+
+		const parsed = new Date(dateString)
+		if (Number.isNaN(parsed.getTime())) {
+			return { isValid: false, message: 'Некорректный формат даты.' }
+		}
+
+		const due = new Date(parsed)
+		due.setHours(0, 0, 0, 0)
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		if (!allowPast && due < today) {
+			return {
+				isValid: false,
+				message: 'Срок выполнения не может быть в прошлом.',
+			}
+		}
+
+		return { isValid: true, value: due.toISOString().split('T')[0] }
+	}
+
+	getDefaultDueDate(offsetDays = 14) {
+		const date = new Date()
+		date.setHours(0, 0, 0, 0)
+		date.setDate(date.getDate() + offsetDays)
+		return date.toISOString().split('T')[0]
+	}
+
+	normalizeStatus(status) {
+		const allowed = ['запланирован', 'назначен', 'в процессе', 'завершен']
+		return allowed.includes(status) ? status : 'запланирован'
+	}
+
+	normalizeTask(task = {}) {
+		const normalized = { ...task }
+		normalized.id = normalized.id || Date.now()
+		normalized.title = (normalized.title || 'Без названия задачи').trim()
+		normalized.description = (
+			normalized.description || 'Описание отсутствует'
+		).trim()
+		normalized.priority = this.normalizePriority(normalized.priority)
+
+		const dueValidation = this.validateDueDate(normalized.dueDate, {
+			allowPast: true,
+		})
+		normalized.dueDate = dueValidation.isValid
+			? dueValidation.value
+			: this.getDefaultDueDate()
+
+		normalized.status = this.normalizeStatus(normalized.status)
+
+		return normalized
+	}
+
+	normalizeGoal(goal = {}) {
+		return {
+			id: goal.id || Date.now(),
+			text: (goal.text || 'Новая цель').trim(),
+			createdAt: goal.createdAt || new Date().toISOString(),
+		}
+	}
+
+	async requestValidDueDate({
+		defaultValue,
+		title = 'Срок задачи',
+		message = 'Введите срок выполнения (ГГГГ-ММ-ДД):',
+		allowPast = false,
+	} = {}) {
+		let fallback = defaultValue || this.getDefaultDueDate()
+
+		while (true) {
+			let input
+
+			if (typeof modal !== 'undefined') {
+				input = await modal.prompt(message, title, fallback)
+			} else {
+				input = prompt(message, fallback)
+			}
+
+			if (input === null) {
+				return null
+			}
+
+			const normalizedInput = (input ?? '').toString().trim()
+			const candidate = normalizedInput || fallback || this.getDefaultDueDate()
+			const validation = this.validateDueDate(candidate, { allowPast })
+
+			if (validation.isValid) {
+				return validation.value
+			}
+
+			this.showValidationMessage(
+				validation.message || 'Введите корректную дату в формате ГГГГ-ММ-ДД.',
+				'warning',
+				'Некорректная дата'
+			)
+
+			fallback = candidate
+		}
+	}
+
+	showValidationMessage(message, type = 'warning', title = 'Внимание') {
+		if (typeof modal !== 'undefined') {
+			modal.show(message, type, title)
+		} else {
+			alert(message)
 		}
 	}
 }
 
-// Функция выбора сотрудника из отдела руководителя
-async function selectEmployeeFromDepartment(title, subtitle = '') {
+// Функция выбора сотрудника из отдела руководителя (с optional HR)
+async function selectEmployeeFromDepartment(
+	title,
+	subtitle = '',
+	options = {}
+) {
+	const { includeHR = false } = options
 	if (!window.MockDB || !window.MockDB.Users) {
 		if (typeof modal !== 'undefined') {
 			modal.show('Ошибка загрузки сотрудников', 'error', 'Ошибка')
@@ -336,15 +765,35 @@ async function selectEmployeeFromDepartment(title, subtitle = '') {
 		}
 	})
 
-	if (departmentEmployees.length === 0) {
+	let availableRecipients = [...departmentEmployees]
+
+	if (includeHR) {
+		const hrManagers = window.MockDB.Users.filter(
+			user => user.role === window.MockDB.UserRole.HR
+		).map(hr => {
+			const department = window.MockDB.Departments.find(
+				d => d.id === hr.departmentId
+			)
+			return {
+				id: hr.id,
+				name: hr.name,
+				position: hr.position,
+				department: department ? department.name : 'HR-отдел',
+				email: hr.email,
+			}
+		})
+		availableRecipients = availableRecipients.concat(hrManagers)
+	}
+
+	if (availableRecipients.length === 0) {
 		if (typeof modal !== 'undefined') {
 			modal.show(
-				'В вашем отделе нет сотрудников для выбора',
+				'Нет доступных пользователей для выбора',
 				'info',
 				'Информация'
 			)
 		} else {
-			alert('В вашем отделе нет сотрудников для выбора')
+			alert('Нет доступных пользователей для выбора')
 		}
 		return null
 	}
@@ -353,7 +802,7 @@ async function selectEmployeeFromDepartment(title, subtitle = '') {
 	return await showEmployeeSelectionModalForTeam(
 		title,
 		subtitle,
-		departmentEmployees
+		availableRecipients
 	)
 }
 
@@ -702,7 +1151,7 @@ async function evaluatePerformance() {
 }
 
 async function setGoals() {
-	const goal =
+	const goalInput =
 		typeof modal !== 'undefined'
 			? await modal.prompt(
 					'Введите цель развития для отдела:',
@@ -711,31 +1160,54 @@ async function setGoals() {
 			  )
 			: prompt('Введите цель развития для отдела:')
 
-	if (goal) {
-		if (typeof NotificationManager !== 'undefined') {
-			NotificationManager.showTempNotification(
-				`Цель "${goal}" установлена для отдела`,
-				'success'
-			)
-		} else if (typeof modal !== 'undefined') {
-			modal.show(`Цель "${goal}" установлена для отдела`, 'success', 'Успешно')
-		} else {
-			alert(`Цель "${goal}" установлена для отдела`)
+	if (goalInput === null) return
+
+	let createdGoal = null
+
+	if (window.teamManagement && typeof window.teamManagement.addGoal === 'function') {
+		createdGoal = window.teamManagement.addGoal(goalInput)
+	} else if ((goalInput || '').trim()) {
+		createdGoal = {
+			text: goalInput.trim(),
 		}
+	}
+
+	if (!createdGoal) {
+		return
+	}
+
+	const safeGoalText =
+		typeof sanitizeInput === 'function'
+			? sanitizeInput(createdGoal.text)
+			: createdGoal.text
+
+	if (typeof NotificationManager !== 'undefined') {
+		NotificationManager.showTempNotification(
+			`Цель "${safeGoalText}" установлена для отдела`,
+			'success'
+		)
+	} else if (typeof modal !== 'undefined') {
+		modal.show(
+			`Цель "${safeGoalText}" установлена для отдела`,
+			'success',
+			'Успешно'
+		)
+	} else {
+		alert(`Цель "${safeGoalText}" установлена для отдела`)
 	}
 }
 
 async function provideFeedback() {
-	// Выбираем сотрудника
-	const selectedEmployeeId = await selectEmployeeFromDepartment(
+	const selectedUserId = await selectEmployeeFromDepartment(
 		'Обратная связь',
-		'Выберите сотрудника для предоставления обратной связи'
+		'Выберите сотрудника или HR-менеджера для предоставления обратной связи',
+		{ includeHR: true }
 	)
 
-	if (!selectedEmployeeId) return
+	if (!selectedUserId) return
 
 	const selectedEmployee = window.MockDB.Users.find(
-		e => e.id == selectedEmployeeId
+		e => e.id == selectedUserId
 	)
 	if (!selectedEmployee) return
 
@@ -757,7 +1229,7 @@ async function provideFeedback() {
 
 	if (feedback && selectedEmployee) {
 		// Сохраняем обратную связь в localStorage
-		saveFeedbackToEmployee(selectedEmployeeId, feedback, managerName)
+		saveFeedbackToEmployee(selectedUserId, feedback, managerName)
 
 		if (typeof NotificationManager !== 'undefined') {
 			NotificationManager.showTempNotification(
@@ -818,6 +1290,12 @@ function updateTaskStatus(taskId, newStatus) {
 function editTask(taskId) {
 	if (window.teamManagement) {
 		window.teamManagement.editTask(taskId)
+	}
+}
+
+function createManagementTask() {
+	if (window.teamManagement) {
+		window.teamManagement.createTask()
 	}
 }
 

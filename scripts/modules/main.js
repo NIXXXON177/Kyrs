@@ -34,7 +34,7 @@
 
 	async init() {
 		if (!this.checkAuth()) {
-			window.location.href = 'pages/auth/login.html'
+			window.location.href = buildPathFromRoot('pages/auth/login.html')
 			return
 		}
 
@@ -108,11 +108,13 @@
 				content: `Содержимое модуля ${i + 1} курса "${course.title}".\n\n${course.description}\n\nВ этом модуле вы изучите важные аспекты темы и получите практические навыки. Материал разработан с учетом современных требований и лучших практик в данной области.\n\nПосле завершения этого модуля вы сможете:\n- Понимать основные концепции\n- Применять полученные знания на практике\n- Решать типовые задачи\n\nУделите достаточно времени для изучения материала и выполнения практических заданий.`
 			})
 		}
-		
+			
 		return modules
 	}
 
 	async loadEmployeeData() {
+		const cachedUserData = this.getCachedUserData()
+
 		try {
 			// Всегда подтягиваем актуальное состояние из MockDB по email пользователя,
 			// чтобы личный кабинет, HR‑панели и отчёты работали с одной и той же "БД"
@@ -151,14 +153,35 @@
 							start_date: cu.start,
 							due_date: cu.due,
 						}
-						// Генерируем модули для курса
+
+					if (
+						courseInfo &&
+						Array.isArray(courseInfo.modules) &&
+						courseInfo.modules.length > 0
+					) {
+						course.modules = courseInfo.modules.map(module => ({
+							...module,
+							completed: Boolean(module.completed),
+						}))
+					} else {
 						course.modules = this.generateCourseModules(course)
+					}
+
+					course.certificateAvailable =
+						courseInfo?.certificateAvailable !== false
+					course.materials =
+						(Array.isArray(courseInfo?.materials) && courseInfo.materials) || []
 						return course
 					})
 				}
 
+				if (cachedUserData?.courses?.length) {
+					mappedCourses = this.mergeCoursesWithCache(mappedCourses, cachedUserData.courses)
+				}
+
 				this.employeeData = {
 					employee: {
+						id: userMock.id,
 						name: userMock.name,
 						position: userMock.position,
 						department:
@@ -413,6 +436,11 @@
 					},
 				]
 
+				this.employeeData.courses = this.employeeData.courses.map(course => ({
+					...course,
+					certificateAvailable: course.certificateAvailable !== false,
+				}))
+
 				// Пересчитываем прогресс курсов на основе модулей
 				this.employeeData.courses.forEach(course => {
 					course.progress = this.calculateCourseProgress(course)
@@ -429,6 +457,87 @@
 		} catch (error) {
 			console.error('Ошибка загрузки данных:', error)
 			this.showError('Не удалось загрузить данные')
+		}
+	}
+
+	getCachedUserData() {
+		try {
+			const raw = localStorage.getItem('userData')
+			return raw ? JSON.parse(raw) : null
+		} catch (error) {
+			console.error('Ошибка чтения кэша userData:', error)
+			return null
+		}
+	}
+
+	mergeCoursesWithCache(latestCourses = [], cachedCourses = []) {
+		return latestCourses.map(course => {
+			const cached = cachedCourses.find(c => c.id === course.id)
+			if (!cached) {
+				return course
+			}
+
+			const merged = { ...course }
+
+			if (Array.isArray(cached.modules) && cached.modules.length) {
+				merged.modules = this.mergeModulesWithCache(
+					merged.modules || [],
+					cached.modules
+				)
+			}
+
+			const cachedProgress =
+				typeof cached.progress === 'number' ? cached.progress : null
+			if (cachedProgress !== null && cachedProgress > (merged.progress ?? 0)) {
+				merged.progress = cachedProgress
+			}
+
+			if (
+				cached.status &&
+				this.getStatusPriority(cached.status) >
+					this.getStatusPriority(merged.status)
+			) {
+				merged.status = cached.status
+			}
+
+			return merged
+		})
+	}
+
+	mergeModulesWithCache(latestModules = [], cachedModules = []) {
+		if (!latestModules.length) {
+			return cachedModules.map(module => ({ ...module }))
+		}
+
+		return latestModules.map(latest => {
+			const cached =
+				cachedModules.find(
+					item =>
+						item.title &&
+						latest.title &&
+						item.title.toLowerCase() === latest.title.toLowerCase()
+				) || cachedModules.find(item => item.content === latest.content)
+
+			if (cached) {
+				return { ...latest, completed: Boolean(cached.completed) }
+			}
+
+			return latest
+		})
+	}
+
+	getStatusPriority(status) {
+		switch (status) {
+			case 'пройден':
+				return 4
+			case 'в процессе':
+				return 3
+			case 'назначен':
+				return 2
+			case 'просрочен':
+				return 1
+			default:
+				return 0
 		}
 	}
 
@@ -535,7 +644,6 @@
 		const card = document.createElement('div')
 		card.className = 'card course-card'
 		card.addEventListener('click', () => {
-			// Определяем правильный путь в зависимости от текущей страницы
 			const isInPagesFolder = window.location.pathname.includes('/pages/')
 			const coursePath = isInPagesFolder
 				? `course-details.html?id=${course.id}`
@@ -595,6 +703,7 @@
 
 		return card
 	}
+
 
 	getStatusClass(status) {
 		switch (status) {
@@ -696,7 +805,7 @@
 
 	renderFeedback() {
 		// Показываем обратную связь только для сотрудников (не для HR и руководителей)
-		if (isHRManager() || isDepartmentHead()) {
+		if (isDepartmentHead()) {
 			return
 		}
 

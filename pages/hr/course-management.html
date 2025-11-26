@@ -3,9 +3,18 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Управление курсами | ТехноЛайн</title>
-		<link rel="stylesheet" href="../style/style.css" />
-		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	<title>Управление курсами | ТехноЛайн</title>
+	<link rel="stylesheet" href="../../style/variables.css" />
+	<link rel="stylesheet" href="../../style/reset.css" />
+	<link rel="stylesheet" href="../../style/layout.css" />
+	<link rel="stylesheet" href="../../style/navigation.css" />
+	<link rel="stylesheet" href="../../style/components.css" />
+	<link rel="stylesheet" href="../../style/course.css" />
+	<link rel="stylesheet" href="../../style/plan.css" />
+	<link rel="stylesheet" href="../../style/animations.css" />
+	<link rel="stylesheet" href="../../style/utilities.css" />
+	<link rel="stylesheet" href="../../style/style.css" />
+	<link rel="icon" href="../../img/MainLogo.svg" type="image/svg+xml" />
 	</head>
 	<body>
 		<div id="app">
@@ -13,15 +22,15 @@
 			<nav class="navbar">
 				<div class="nav-container">
 					<div class="nav-logo">
-						<a href="../index.html"
-							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
-							<span class="logo-text">ТехноЛайн</span></a
-						>
+				<a href="../../index.html"
+					><img src="../../img/MainLogo.svg" alt="Logo" class="logo-img" />
+					<span class="logo-text">ТехноЛайн</span></a
+				>
 					</div>
 					<div class="nav-menu" id="navMenu">
-						<a href="courses.html" class="nav-link">Мои курсы</a>
-						<a href="plan.html" class="nav-link">План обучения</a>
-						<a href="profile.html" class="nav-link">Профиль</a>
+				<a href="../employee/courses.html" class="nav-link">Мои курсы</a>
+				<a href="../employee/plan.html" class="nav-link">План обучения</a>
+				<a href="../common/profile.html" class="nav-link">Профиль</a>
 						<div class="user-section">
 							<span class="user-name" id="userName"></span>
 							<button class="btn-logout" id="logoutBtn">Выйти</button>
@@ -119,6 +128,55 @@
 									<option value="рекомендованный">Рекомендованный</option>
 								</select>
 							</div>
+							<div class="form-group">
+								<label class="form-label" for="courseCertificate"
+									>Сертификат</label
+								>
+								<div class="form-switch">
+									<input
+										type="checkbox"
+										id="courseCertificate"
+										class="form-switch-input"
+										checked
+									/>
+									<label for="courseCertificate" class="form-switch-label">
+										Выдавать сертификат по завершении курса
+									</label>
+								</div>
+								<p class="form-hint">
+									Если выключить переключатель, курс не будет отображаться в списке для печати сертификатов.
+								</p>
+							</div>
+							<div class="form-group">
+								<label class="form-label">Материалы курса</label>
+								<p class="form-hint">
+									Добавьте PDF, видео или ссылки, которые помогут сотруднику пройти курс.
+								</p>
+								<div id="materialsList" class="dynamic-list"></div>
+								<button
+									type="button"
+									class="btn btn-outline"
+									id="addMaterialBtn"
+									style="margin-top: 0.75rem"
+								>
+									➕ Добавить материал
+								</button>
+							</div>
+							<div class="form-group">
+								<label class="form-label">Модули курса</label>
+								<p class="form-hint">
+									Опишите содержание курса: название модуля, тип материала, длительность и краткое содержание.
+								</p>
+								<div id="modulesList" class="dynamic-list"></div>
+								<button
+									type="button"
+									class="btn btn-outline"
+									id="addModuleBtn"
+									style="margin-top: 0.75rem"
+								>
+									➕ Добавить модуль
+								</button>
+							</div>
 							<div class="form-actions">
 								<button
 									type="button"
@@ -135,10 +193,10 @@
 			</div>
 		</div>
 
-		<script src="../../scripts/core/mock-db.js"></script>
-		<script src="../scripts/core/common.js"></script>
-		<script src="../scripts/core/auth.js"></script>
-		<script src="../scripts/core/modal.js"></script>
-		<script src="../../scripts/modules/course-management.js"></script>
+	<script src="../../scripts/core/mock-db.js"></script>
+	<script src="../../scripts/core/common.js"></script>
+	<script src="../../scripts/core/auth.js"></script>
+	<script src="../../scripts/core/modal.js"></script>
+	<script src="../../scripts/modules/course-management.js"></script>
 	</body>
 </html>

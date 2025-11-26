@@ -68,25 +68,31 @@ class PlanManager {
 	}
 
 	getCourseCategory(title) {
-		const categories = {
-			'IT-безопасность': 'Безопасность',
-			Laravel: 'Технические навыки',
-			Git: 'Технические навыки',
-			Docker: 'Технические навыки',
-			SQL: 'Технические навыки',
-			JavaScript: 'Технические навыки',
-			DevOps: 'Технические навыки',
-			Архитектура: 'Технические навыки',
-			'Управление персоналом': 'HR',
-			'Трудовое законодательство': 'HR',
-			Мотивация: 'HR',
-			'Управление IT-проектами': 'Управление',
-			Лидерство: 'Управление',
-			'Стратегическое планирование': 'Управление',
+		if (!title || typeof title !== 'string') {
+			return 'Технические навыки'
 		}
 
+		const categories = {
+			'it-безопасность': 'Безопасность',
+			laravel: 'Технические навыки',
+			git: 'Технические навыки',
+			docker: 'Технические навыки',
+			sql: 'Технические навыки',
+			javascript: 'Технические навыки',
+			devops: 'Технические навыки',
+			архитектура: 'Технические навыки',
+			'управление персоналом': 'HR',
+			'трудовое законодательство': 'HR',
+			мотивация: 'HR',
+			'управление it-проектами': 'Управление',
+			лидерство: 'Управление',
+			'стратегическое планирование': 'Управление',
+		}
+
+		const normalizedTitle = title.toLowerCase()
+
 		for (const [key, category] of Object.entries(categories)) {
-			if (title.includes(key)) return category
+			if (normalizedTitle.includes(key)) return category
 		}
 
 		return 'Технические навыки'
@@ -293,22 +299,12 @@ class PlanManager {
 	}
 
 	async viewCourseDetails(courseId) {
-		const course = this.learningPlan.upcoming_courses.find(
-			c => c.id == courseId
-		)
-		if (course) {
-			const message = `Детали курса: ${course.title}\n\nОписание: ${
-				course.description
-			}\nДата: ${this.formatDate(
-				course.scheduled_date
-			)}\nПриоритет: ${this.getPriorityText(course.priority)}`
+		const isInPagesFolder = window.location.pathname.includes('/pages/')
+		const coursePath = isInPagesFolder
+			? `course-details.html?id=${courseId}`
+			: `pages/employee/course-details.html?id=${courseId}`
 
-			if (typeof modal !== 'undefined') {
-				await modal.show(message, 'info', 'Детали курса')
-			} else if (typeof NotificationManager !== 'undefined') {
-				NotificationManager.showTempNotification(message, 'info')
-			}
-		}
+		window.location.href = coursePath
 	}
 
 	formatDate(dateString) {

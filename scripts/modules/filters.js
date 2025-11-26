@@ -107,6 +107,7 @@ class FilterManager {
 		this.currentPage = 1 // сброс на первую страницу при фильтрации
 		this.renderCourses()
 		this.updateResultsCount()
+		this.updateStatistics()
 	}
 
 	renderCourses() {
@@ -203,57 +204,61 @@ class FilterManager {
 	}
 
 	showCourseModal(course) {
+		const hasCertificate = course.certificateAvailable !== false
+		const certificateInfo = !hasCertificate
+			? 'Сертификат не предусмотрен'
+			: course.status === 'пройден'
+			? 'Сертификат получен'
+			: 'Сертификат будет доступен после завершения'
+
 		// Create modal content
 		const modalContent = `
-			<div class="course-modal-header">
-				<h2 class="course-modal-title">${course.title}</h2>
-				<div class="course-modal-status ${this.getStatusClass(course.status)}">
-					${this.getStatusText(course.status)}
+			<div class="course-modal-content">
+				<div class="course-modal-header">
+					<div>
+						<p class="course-modal-label">Избранный курс</p>
+						<h2 class="course-modal-title">${course.title}</h2>
+					</div>
+					<div class="course-modal-status ${this.getStatusClass(course.status)}">
+						${this.getStatusText(course.status)}
+					</div>
 				</div>
-			</div>
-			<div class="course-modal-body">
-				<div class="course-modal-info">
-					<div class="info-grid">
-						<div class="info-item">
-							<h4>Дата начала</h4>
-							<p>${this.formatDate(course.start_date)}</p>
+				<div class="course-modal-body">
+					<div class="course-modal-info-grid">
+						<div class="course-info-card">
+							<p class="course-info-label">Дата начала</p>
+							<p class="course-info-value">${this.formatDate(course.start_date)}</p>
 						</div>
-						<div class="info-item">
-							<h4>Срок окончания</h4>
-							<p>${this.formatDate(course.due_date)}</p>
+						<div class="course-info-card">
+							<p class="course-info-label">Срок окончания</p>
+							<p class="course-info-value">${this.formatDate(course.due_date)}</p>
 						</div>
-						<div class="info-item">
-							<h4>Прогресс</h4>
-							<p>${course.progress}%</p>
+						<div class="course-info-card">
+							<p class="course-info-label">Прогресс</p>
+							<p class="course-info-value">${course.progress}%</p>
 						</div>
-						<div class="info-item">
-							<h4>Статус сертификата</h4>
-							<p>${
-								course.status === 'пройден'
-									? 'Сертификат получен'
-									: course.status === 'в процессе'
-									? 'Сертификат будет доступен после завершения'
-									: 'Сертификат не доступен'
-							}</p>
+						<div class="course-info-card">
+							<p class="course-info-label">Статус сертификата</p>
+							<p class="course-info-value">${certificateInfo}</p>
 						</div>
 					</div>
-					<div class="course-description">
+					<div class="course-modal-description">
 						<h4>Описание курса</h4>
 						<p>${course.description || 'Описание курса отсутствует.'}</p>
 					</div>
 				</div>
-			</div>
-			<div class="course-modal-actions">
-				<button class="btn btn-secondary close-modal-btn">Закрыть</button>
-				<button class="btn btn-primary start-course-btn" data-course-id="${course.id}">
-					${
-						course.status === 'пройден'
-							? 'Повторить курс'
-							: course.status === 'в процессе'
-							? 'Продолжить обучение'
-							: 'Начать обучение'
-					}
-				</button>
+				<div class="course-modal-actions">
+					<button class="btn btn-secondary close-modal-btn">Закрыть</button>
+					<button class="btn btn-primary start-course-btn" data-course-id="${course.id}">
+						${
+							course.status === 'пройден'
+								? 'Повторить курс'
+								: course.status === 'в процессе'
+								? 'Продолжить обучение'
+								: 'Начать обучение'
+						}
+					</button>
+				</div>
 			</div>
 		`
 
@@ -264,7 +269,7 @@ class FilterManager {
 			customModal.className = 'modal course-details-modal'
 			customModal.innerHTML = `
 				<div class="modal-overlay"></div>
-				<div class="modal-content course-modal-content">
+				<div class="modal-content">
 					<button class="modal-close">×</button>
 					${modalContent}
 				</div>
@@ -334,8 +339,143 @@ class FilterManager {
 	updateResultsCount() {
 		const countElement = document.getElementById('resultsCount')
 		if (countElement) {
-			countElement.textContent = `Найдено курсов: ${this.filteredCourses.length}`
+			const total = this.courses.length
+			if (total > 0) {
+				countElement.textContent = `Найдено курсов: ${this.filteredCourses.length} из ${total}`
+			} else {
+				countElement.textContent = 'Курсы не найдены'
+			}
 		}
+	}
+
+	updateStatistics() {
+		if (!document.getElementById('statTotalCourses')) {
+			return
+		}
+
+		const overallStats = this.calculateStatistics(this.courses)
+		const filteredStats = this.calculateStatistics(this.filteredCourses)
+
+		this.setStatValue('statTotalCourses', overallStats.total)
+		this.setStatValue('statFilteredCourses', filteredStats.total)
+		this.setStatValue('statActiveCourses', overallStats.active)
+		this.setStatValue('statAssignedCourses', overallStats.assigned)
+		this.setStatValue('statCompletedCourses', overallStats.completed)
+		this.setStatValue('statInProgressCourses', overallStats.inProgress)
+		this.setStatValue('statOverdueCourses', overallStats.overdue)
+		this.setStatValue('statUpcomingDeadlines', overallStats.upcomingDeadlines)
+		this.setStatValue('statAvgProgress', `${overallStats.avgProgress}%`)
+		this.setStatValue('statTotalHours', this.formatHours(overallStats.totalHours))
+	}
+
+	setStatValue(elementId, value) {
+		const element = document.getElementById(elementId)
+		if (element && value !== undefined && value !== null) {
+			element.textContent = value
+		}
+	}
+
+	calculateStatistics(dataset = []) {
+		const stats = {
+			total: dataset.length,
+			completed: 0,
+			inProgress: 0,
+			assigned: 0,
+			overdue: 0,
+			upcomingDeadlines: 0,
+			totalHours: 0,
+			progressSum: 0,
+			active: 0,
+			avgProgress: 0,
+		}
+
+		if (dataset.length === 0) {
+			return stats
+		}
+
+		const now = new Date()
+		const weekMs = 7 * 24 * 60 * 60 * 1000
+
+		dataset.forEach(course => {
+			const status = course.status
+			switch (status) {
+				case 'пройден':
+					stats.completed++
+					break
+				case 'в процессе':
+					stats.inProgress++
+					break
+				case 'назначен':
+					stats.assigned++
+					break
+				case 'просрочен':
+					stats.overdue++
+					break
+			}
+
+			if (status !== 'пройден') {
+				const dueDate = course?.due_date ? new Date(course.due_date) : null
+				if (dueDate instanceof Date && !Number.isNaN(dueDate.getTime())) {
+					const diff = dueDate - now
+					if (diff > 0 && diff <= weekMs) {
+						stats.upcomingDeadlines++
+					}
+				}
+			}
+
+			stats.totalHours += this.estimateCourseHours(course)
+			if (typeof course.progress === 'number') {
+				stats.progressSum += course.progress
+			}
+		})
+
+		stats.active = stats.total - stats.completed
+		stats.avgProgress = Math.round(stats.progressSum / stats.total)
+
+		return stats
+	}
+
+	estimateCourseHours(course) {
+		if (!course) return 0
+
+		const { duration } = course
+		if (typeof duration === 'number' && !Number.isNaN(duration)) {
+			return duration
+		}
+
+		if (typeof duration === 'string') {
+			const hasMinutes = /мин/i.test(duration)
+			const cleaned = duration.replace(',', '.').replace(/[^\d.]/g, '')
+			const numericValue = parseFloat(cleaned)
+
+			if (!Number.isNaN(numericValue)) {
+				return hasMinutes
+					? parseFloat((numericValue / 60).toFixed(1))
+					: numericValue
+			}
+		}
+
+		if (Array.isArray(course.modules) && course.modules.length > 0) {
+			return parseFloat((course.modules.length * 1.5).toFixed(1))
+		}
+
+		return 0
+	}
+
+	formatHours(value) {
+		if (!value || Number.isNaN(value)) {
+			return '0 ч'
+		}
+
+		if (value >= 1000) {
+			return `${(value / 1000).toFixed(1)} тыс. ч`
+		}
+
+		if (value >= 10) {
+			return `${Math.round(value)} ч`
+		}
+
+		return `${value.toFixed(1)} ч`
 	}
 
 	getStatusClass(status) {
@@ -400,11 +540,11 @@ class FilterManager {
 						'Требуется авторизация'
 					)
 					.then(() => {
-						window.location.href = 'login.html'
+						window.location.href = buildPathFromRoot('pages/auth/login.html')
 					})
 			} else {
 				alert('Необходимо авторизоваться для печати сертификатов')
-				window.location.href = 'login.html'
+				window.location.href = buildPathFromRoot('pages/auth/login.html')
 			}
 			return
 		}
@@ -420,9 +560,11 @@ class FilterManager {
 			return
 		}
 
-		// Фильтруем только пройденные курсы
+		// Фильтруем только пройденные курсы с доступным сертификатом
 		const completedCourses = userData.courses.filter(
-			course => course.status === 'пройден'
+			course =>
+				course.status === 'пройден' &&
+				course.certificateAvailable !== false
 		)
 
 		if (completedCourses.length === 0) {
@@ -904,14 +1046,14 @@ function closeCourseModal() {
 
 function startCourse(courseId) {
 	closeCourseModal()
-	// Redirect to course details with study mode
-	window.location.href = `course-details.html?id=${courseId}&mode=study`
+	// Сначала показываем описание курса, пользователь сам запускает обучение
+	window.location.href = `course-details.html?id=${courseId}`
 }
 
 if (window.location.pathname.includes('courses.html')) {
 	document.addEventListener('DOMContentLoaded', () => {
 		if (!AuthManager.checkAuth()) {
-			window.location.href = 'login.html'
+			window.location.href = buildPathFromRoot('pages/auth/login.html')
 			return
 		}
 

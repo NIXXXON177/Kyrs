@@ -197,6 +197,47 @@
 	line-height: 1.5;
 }
 
+/* Динамические формы (курсы) */
+.form-hint {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	margin: 0 0 0.75rem 0;
+}
+
+.dynamic-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.dynamic-item {
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius);
+	padding: 1rem;
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.dynamic-row {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.dynamic-row.multi {
+	flex-direction: row;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.dynamic-row.multi > * {
+	flex: 1;
+}
+
+.dynamic-item .btn-sm {
+	margin-top: 0.5rem;
+}
+
 /* Обратная связь */
 .feedback-card {
 	margin-bottom: 2rem;
@@ -313,6 +354,25 @@
 
 .form-input::placeholder {
 	color: var(--text-muted);
+}
+
+.form-switch {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.form-switch-input {
+	width: 20px;
+	height: 20px;
+	accent-color: var(--primary);
+	cursor: pointer;
+}
+
+.form-switch-label {
+	color: var(--text-light);
+	cursor: pointer;
+	user-select: none;
 }
 
 /* Кнопки */
@@ -552,4 +612,84 @@
 	background: var(--primary);
 	color: #fff;
 	transform: translateY(-1px) scale(1.07);
+}
+
+/* Цели отдела */
+.department-goals {
+	margin-bottom: 2rem;
+	padding: 1.5rem;
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius);
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.department-goals-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1.5rem;
+}
+
+.department-goals-header h3 {
+	margin: 0 0 0.35rem 0;
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: var(--text-light);
+}
+
+.department-goals-header p {
+	margin: 0;
+	color: var(--text-muted);
+}
+
+.department-goals-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.department-goal-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.03);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.department-goal-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	background: rgba(0, 89, 255, 0.15);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.4rem;
+}
+
+.department-goal-text {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--text-light);
+}
+
+.department-goal-meta {
+	display: block;
+	margin-top: 0.35rem;
+	font-size: 0.85rem;
+	color: var(--text-muted);
+}
+
+.department-goals-empty {
+	text-align: center;
+	padding: 1rem;
+	font-size: 0.95rem;
+	color: var(--text-muted);
+	border: 1px dashed rgba(255, 255, 255, 0.15);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.02);
 }

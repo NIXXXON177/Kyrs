@@ -3,24 +3,33 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Мои курсы | ТехноЛайн</title>
-		<link rel="stylesheet" href="../style/style.css" />
-		<link rel="icon" href="../img/MainLogo.svg" type="image/svg+xml" />
+	<title>Мои курсы | ТехноЛайн</title>
+	<link rel="stylesheet" href="../../style/variables.css" />
+	<link rel="stylesheet" href="../../style/reset.css" />
+	<link rel="stylesheet" href="../../style/layout.css" />
+	<link rel="stylesheet" href="../../style/navigation.css" />
+	<link rel="stylesheet" href="../../style/components.css" />
+	<link rel="stylesheet" href="../../style/course.css" />
+	<link rel="stylesheet" href="../../style/plan.css" />
+	<link rel="stylesheet" href="../../style/animations.css" />
+	<link rel="stylesheet" href="../../style/utilities.css" />
+	<link rel="stylesheet" href="../../style/style.css" />
+	<link rel="icon" href="../../img/MainLogo.svg" type="image/svg+xml" />
 	</head>
 	<body>
 		<div id="app">
 			<nav class="navbar">
 				<div class="nav-container">
 					<div class="nav-logo">
-						<a href="../index.html"
-							><img src="../img/MainLogo.svg" alt="Logo" class="logo-img" />
-							<span class="logo-text">ТехноЛайн</span></a
-						>
+				<a href="../../index.html"
+					><img src="../../img/MainLogo.svg" alt="Logo" class="logo-img" />
+					<span class="logo-text">ТехноЛайн</span></a
+				>
 					</div>
 					<div class="nav-menu" id="navMenu">
-						<a href="courses.html" class="nav-link active">Мои курсы</a>
-						<a href="plan.html" class="nav-link">План обучения</a>
-						<a href="profile.html" class="nav-link">Профиль</a>
+				<a href="courses.html" class="nav-link active">Мои курсы</a>
+				<a href="plan.html" class="nav-link">План обучения</a>
+				<a href="../common/profile.html" class="nav-link">Профиль</a>
 						<div class="user-section">
 							<span class="user-name" id="userName"></span>
 							<button class="btn-logout" id="logoutBtn">Выйти</button>
@@ -37,6 +46,58 @@
 			<main class="main-content">
 				<div class="container">
 					<h1 class="page-title">Мои курсы</h1>
+
+					<section class="card course-stats-card">
+						<div class="card-header">
+							<h2 class="card-title">Статистика обучения</h2>
+						</div>
+						<div class="course-stats-grid">
+							<div class="course-stat-card">
+								<span class="course-stat-label">Всего курсов</span>
+								<span class="course-stat-value" id="statTotalCourses">0</span>
+								<span class="course-stat-meta">
+									В подборке:
+									<span id="statFilteredCourses">0</span>
+								</span>
+							</div>
+
+							<div class="course-stat-card">
+								<span class="course-stat-label">Активные курсы</span>
+								<span class="course-stat-value" id="statActiveCourses">0</span>
+								<span class="course-stat-meta">
+									Назначено:
+									<span id="statAssignedCourses">0</span>
+								</span>
+							</div>
+
+							<div class="course-stat-card">
+								<span class="course-stat-label">Завершено</span>
+								<span class="course-stat-value" id="statCompletedCourses">0</span>
+								<span class="course-stat-meta">
+									В процессе:
+									<span id="statInProgressCourses">0</span>
+								</span>
+							</div>
+
+							<div class="course-stat-card">
+								<span class="course-stat-label">Просрочено</span>
+								<span class="course-stat-value" id="statOverdueCourses">0</span>
+								<span class="course-stat-meta">
+									Ближайшие дедлайны:
+									<span id="statUpcomingDeadlines">0</span>
+								</span>
+							</div>
+
+							<div class="course-stat-card highlight">
+								<span class="course-stat-label">Средний прогресс</span>
+								<span class="course-stat-value" id="statAvgProgress">0%</span>
+								<span class="course-stat-meta">
+									Учебных часов:
+									<span id="statTotalHours">0 ч</span>
+								</span>
+							</div>
+						</div>
+					</section>
 
 					<!-- Фильтры -->
 					<div class="filters">
@@ -89,11 +150,11 @@
 			</main>
 		</div>
 
-		<script src="../../scripts/core/mock-db.js"></script>
-		<script src="../scripts/core/common.js"></script>
-		<script src="../scripts/core/auth.js"></script>
-		<script src="../scripts/core/modal.js"></script>
-		<script src="../../scripts/modules/filters.js"></script>
-		<script src="../../scripts/init/courses-init.js"></script>
+	<script src="../../scripts/core/mock-db.js"></script>
+	<script src="../../scripts/core/common.js"></script>
+	<script src="../../scripts/core/auth.js"></script>
+	<script src="../../scripts/core/modal.js"></script>
+	<script src="../../scripts/modules/filters.js"></script>
+	<script src="../../scripts/init/courses-init.js"></script>
 	</body>
 </html>

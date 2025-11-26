@@ -9,6 +9,7 @@
 	init() {
 		this.loadDismissedNotifications()
 		this.checkCourseDeadlines()
+		this.checkAssignedCourseNotifications()
 		this.renderNotifications()
 	}
 
@@ -94,6 +95,43 @@
 		}
 	}
 
+	checkAssignedCourseNotifications() {
+		if (
+			!this.employeeData ||
+			!this.employeeData.employee ||
+			typeof getAssignedCourseRecords !== 'function'
+		) {
+			return
+		}
+
+		const employeeId = this.employeeData.employee.id
+		if (!employeeId) return
+
+		const assignments = getAssignedCourseRecords(employeeId)
+		assignments.forEach(assignment => {
+			if (assignment.acknowledged) {
+				return
+			}
+
+			const notificationId = `assigned-course-${assignment.id}`
+			if (this.dismissedNotifications.includes(notificationId)) {
+				return
+			}
+
+			this.notifications.push({
+				id: notificationId,
+				type: 'info',
+				title: 'Назначен новый курс',
+				message: `Вам назначен курс "${assignment.title}"`,
+				courseId: assignment.courseId,
+				assignmentInfo: {
+					employeeId,
+					assignmentId: assignment.id,
+				},
+			})
+		})
+	}
+
 	getDayText(days) {
 		if (days === 1) return 'день'
 		if (days >= 2 && days <= 4) return 'дня'
@@ -124,16 +162,8 @@
 		closeBtn.innerHTML = '&times;'
 		closeBtn.setAttribute('aria-label', 'Закрыть уведомление')
 		closeBtn.addEventListener('click', e => {
-			e.stopPropagation() // чтобы не сработал клик по карточке (переход)
-			element.remove()
-			// Добавляем в список скрытых уведомлений
-			if (notification.id) {
-				this.dismissedNotifications.push(notification.id)
-				this.saveDismissedNotifications()
-			}
-			// Удаляем из массива уведомлений
-			const index = this.notifications.indexOf(notification)
-			if (index > -1) this.notifications.splice(index, 1)
+			e.stopPropagation()
+			this.dismissNotification(notification, element)
 		})
 
 		const icon = document.createElement('div')
@@ -166,6 +196,7 @@
 				const coursePath = isInPagesFolder
 					? `course-details.html?id=${notification.courseId}`
 					: `pages/employee/course-details.html?id=${notification.courseId}`
+				this.dismissNotification(notification, element)
 				window.location.href = coursePath
 			})
 		}
@@ -190,6 +221,32 @@
 				return 'ℹ️'
 			default:
 				return '📢'
+		}
+	}
+
+	dismissNotification(notification, element) {
+		if (element && typeof element.remove === 'function') {
+			element.remove()
+		}
+
+		if (notification.id) {
+			this.dismissedNotifications.push(notification.id)
+			this.saveDismissedNotifications()
+		}
+
+		const index = this.notifications.indexOf(notification)
+		if (index > -1) {
+			this.notifications.splice(index, 1)
+		}
+
+		if (
+			notification.assignmentInfo &&
+			typeof markAssignedCourseAcknowledged === 'function'
+		) {
+			markAssignedCourseAcknowledged(
+				notification.assignmentInfo.employeeId,
+				notification.assignmentInfo.assignmentId
+			)
 		}
 	}
 

@@ -6,13 +6,13 @@ class DepartmentStats {
 
 	init() {
 		if (!AuthManager.checkAuth()) {
-			window.location.href = 'login.html'
+			window.location.href = buildPathFromRoot('pages/auth/login.html')
 			return
 		}
 
 		// Проверяем роль
 		if (!isDepartmentHead()) {
-			window.location.href = '../index.html'
+			window.location.href = buildPathFromRoot('index.html')
 			return
 		}
 
